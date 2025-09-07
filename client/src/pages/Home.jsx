@@ -3,6 +3,8 @@ import { ArrowRight } from "lucide-react";
 import FeaturesSection from "../components/FeaturesSection";
 import Clubs from "../components/Clubs";
 import UpcomingEvents from "../components/UpcomingEvents";
+import Cta from "../components/Cta";
+import Footer from "../components/Footer";
 
 const Home = () => {
   return (
@@ -49,6 +51,8 @@ const Home = () => {
       {/* Features Section */}
       <FeaturesSection />
       <Clubs /> <UpcomingEvents />
+      <Cta />
+      <Footer/>
     </div>
   );
 };

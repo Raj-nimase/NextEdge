@@ -17,6 +17,15 @@ const events = [
     image:
       "https://images.unsplash.com/photo-1531058020387-3be344556be6?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     badge: "Upcoming Event",
+  },{
+    title: "Dance Competition",
+    date: "Sep 15, 2025 11:00:00", // add time for accuracy
+    location: "Business School Auditorium",
+    description:
+      "Showcase your Dance skills to potential investors and win seed funding to kickstart your journey.",
+    image:
+      "https://images.unsplash.com/photo-1537365587684-f490102e1225?q=80&w=871&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",  
+    badge: "Upcoming Event",
   },
   // other events...
 ];

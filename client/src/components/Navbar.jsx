@@ -80,8 +80,8 @@ useEffect(() => {
       <div
         className={`
           flex items-center justify-between 
-          transition-all duration-300 ease-in-out px-[10vw]
-          ${isScrolled ? "py-2" : "py-4"}
+          transition-all duration-300 ease-in-out    
+          ${isScrolled ? "px-[4vw]" : "px-[10vw]"} 
         `}
       >
         {/* Logo + Brand */}
