@@ -5,8 +5,10 @@ import Clubs from "../components/Clubs";
 import UpcomingEvents from "../components/UpcomingEvents";
 import Cta from "../components/Cta";
 import Footer from "../components/Footer";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
+  const Navigate = useNavigate();
   return (
     <div className="transition-colors duration-500">
       {/* HERO SECTION START */}
@@ -40,7 +42,10 @@ const Home = () => {
             <button className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold flex items-center gap-2 shadow-lg">
               <span>Join Us</span>
             </button>
-            <button className="bg-white text-black hover:bg-gray-200 px-6 py-3 rounded-lg font-semibold flex items-center gap-2 shadow-lg">
+            <button
+              className="bg-white text-black hover:bg-gray-200 px-6 py-3 rounded-lg font-semibold flex items-center gap-2 shadow-lg"
+              onClick={() => Navigate("/clubs")}
+            >
               <span>Explore Clubs</span>
               <ArrowRight className="w-5 h-5" />
             </button>
@@ -52,7 +57,7 @@ const Home = () => {
       <FeaturesSection />
       <Clubs /> <UpcomingEvents />
       <Cta />
-      <Footer/>
+      <Footer />
     </div>
   );
 };

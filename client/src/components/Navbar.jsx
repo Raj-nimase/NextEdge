@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { User2, Moon, Sun, Menu, X } from "lucide-react";
 import logo from "../assets/logo.png";
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const [darkMode, setDarkMode] = useState(false);
@@ -56,12 +57,12 @@ useEffect(() => {
 
 
   const navLinks = [
-    { label: "Home", href: "#home" },
-    { label: "About", href: "#about" },
-    { label: "Clubs", href: "#clubs" },
-    { label: "Events", href: "#events" },
-    { label: "Gallery", href: "#gallery" },
-    { label: "Contact", href: "#contact" },
+    { label: "Home", href: "/" },
+    { label: "About", href: "/about" },
+    { label: "Clubs", href: "/clubs" },
+    { label: "Events", href: "/events" },
+    { label: "Gallery", href: "/gallery" },
+    { label: "Contact", href: "/contact" },
   ];
 
   return (
@@ -107,14 +108,14 @@ useEffect(() => {
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-8 font-medium text-gray-900 dark:text-white">
           {navLinks.map(({ label, href }) => (
-            <a
+            <Link
               key={label}
-              href={href}
+              to={href}
               className="hover:text-blue-600 dark:hover:text-blue-400 transition"
               onClick={() => setMenuOpen(false)}
             >
               {label}
-            </a>
+            </Link>
           ))}
         </div>
 

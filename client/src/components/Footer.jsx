@@ -1,4 +1,5 @@
 import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { Link } from "react-router-dom";
 
 
 const Footer = () => {
@@ -35,7 +36,7 @@ const Footer = () => {
           <ul className="space-y-2 text-sm">
             <li><a href="#" className="hover:text-indigo-500">Home</a></li>
             <li><a href="#" className="hover:text-indigo-500">About</a></li>
-            <li><a href="#" className="hover:text-indigo-500">Clubs</a></li>
+            <li><Link to={'/clubs'} className="hover:text-indigo-500">Clubs</Link></li>
             <li><a href="#" className="hover:text-indigo-500">Events</a></li>
             <li><a href="#" className="hover:text-indigo-500">Gallery</a></li>
             <li><a href="#" className="hover:text-indigo-500">Contact</a></li>

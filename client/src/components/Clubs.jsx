@@ -1,8 +1,10 @@
 // components/Clubs.jsx
+import { useNavigate } from "react-router-dom";
 
 import ClubCard from "./ClubCard";
 
 const Clubs = () => {
+  const navigate = useNavigate();
   const clubs = [
     {
       logo: "💻",
@@ -55,7 +57,8 @@ const Clubs = () => {
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-2">Our Clubs</h2>
           <p className="text-gray-600 dark:text-gray-400">
-            Explore student-led clubs designed to grow your skills, network, and interests.
+            Explore student-led clubs designed to grow your skills, network, and
+            interests.
           </p>
         </div>
 
@@ -69,7 +72,10 @@ const Clubs = () => {
 
       {/* Explore All Clubs button */}
       <div className="flex justify-center mt-12">
-        <button className="text-black dark:text-white border border-black/30 dark:border-white/30 rounded-lg px-6 py-2 hover:bg-black/10 dark:hover:bg-white/10 transition">
+        <button
+          className="text-black dark:text-white border border-black/30 dark:border-white/30 rounded-lg px-6 py-2 hover:bg-black/10 dark:hover:bg-white/10 transition"
+          onClick={() => navigate("/clubs")}
+        >
           Explore All Clubs →
         </button>
       </div>

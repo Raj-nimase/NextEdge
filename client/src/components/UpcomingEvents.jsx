@@ -10,41 +10,49 @@ import { FaCalendarAlt, FaMapMarkerAlt } from "react-icons/fa";
 const events = [
   {
     title: "Startup Pitch Competition",
-    date: "June 12, 2025 09:00:00", // add time for accuracy
+    date: "Oct 12, 2025 09:00:00",
     location: "Business School Auditorium",
     description:
       "Showcase your business ideas to potential investors and win seed funding to kickstart your entrepreneurial journey.",
     image:
       "https://images.unsplash.com/photo-1531058020387-3be344556be6?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     badge: "Upcoming Event",
-  },{
+  },
+  {
     title: "Dance Competition",
-    date: "Sep 15, 2025 11:00:00", // add time for accuracy
+    date: "Sep 15, 2025 11:00:00",
     location: "Business School Auditorium",
     description:
       "Showcase your Dance skills to potential investors and win seed funding to kickstart your journey.",
     image:
-      "https://images.unsplash.com/photo-1537365587684-f490102e1225?q=80&w=871&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",  
+      "https://images.unsplash.com/photo-1537365587684-f490102e1225?q=80&w=871&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     badge: "Upcoming Event",
   },
-  // other events...
+  // Add more events...
 ];
 
 const UpcomingEvents = () => {
   const thumbsSwiperRef = useRef(null);
 
   // Countdown state
-  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [timeLeft, setTimeLeft] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  });
+
+  // Track which event is active
+  const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
-    const targetDate = new Date(events[0].date).getTime();
+    const targetDate = new Date(events[activeIndex].date).getTime();
 
-    const interval = setInterval(() => {
+    const updateCountdown = () => {
       const now = Date.now();
       const distance = targetDate - now;
 
-      if (distance < 0) {
-        clearInterval(interval);
+      if (distance <= 0) {
         setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
         return;
       }
@@ -55,10 +63,13 @@ const UpcomingEvents = () => {
         minutes: Math.floor((distance / 1000 / 60) % 60),
         seconds: Math.floor((distance / 1000) % 60),
       });
-    }, 1000);
+    };
+
+    updateCountdown(); // Run immediately once
+    const interval = setInterval(updateCountdown, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [activeIndex]); // Re-run when active event changes
 
   return (
     <section className="py-20 px-4 sm:px-[5vw] bg-white text-black dark:bg-black dark:text-white transition-colors duration-300">
@@ -106,6 +117,7 @@ const UpcomingEvents = () => {
               }
             }, 0);
           }}
+          onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)} // 🔥 Update active event
           className="rounded-xl overflow-hidden"
         >
           {events.map((event, index) => (
