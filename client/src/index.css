@@ -1,5 +1,5 @@
 @import "tailwindcss";
-
+@import "locomotive-scroll/dist/locomotive-scroll.css";
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
@@ -7,3 +7,6 @@
     @apply bg-white dark:bg-black transition-colors duration-500;
   }
 }
+
+
+
