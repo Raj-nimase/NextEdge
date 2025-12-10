@@ -1,12 +1,36 @@
+/* --- START OF FILE --- */
+
+/* 1. ALL @import STATEMENTS MUST BE GROUPED AT THE TOP */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Space+Grotesk:wght@400;500;700&display=swap');
 @import "tailwindcss";
 @import "locomotive-scroll/dist/locomotive-scroll.css";
+
+/* 2. CUSTOM VARIANTS (Must be before any @layer directives) */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* 3. TAILWIND LAYERS and other @rules */
 @layer base {
   body {
     @apply bg-white dark:bg-black transition-colors duration-500;
   }
 }
 
+@font-face{
+  font-family: "cool";
+  src: url('/src/assets/fonts/coolvetica/Coolvetica\ Hv\ Comp.otf') format('otf');
+  font-display: swap;
+}
 
+/* 4. NON-LAYERED, NON-TAILWIND CUSTOM CSS */
+body {
+  margin: 0;
+  padding: 0;
+  /* This is necessary if not using a utility class for overflow-x-hidden */
+  overflow-x: hidden; 
+}
 
+/* Add these utility classes if you aren't using Tailwind config for fonts */
+.font-heading { font-family: 'Space Grotesk', sans-serif; }
+.font-body { font-family: 'Outfit', sans-serif; }
+
+/* --- END OF FILE --- */

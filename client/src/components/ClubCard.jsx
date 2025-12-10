@@ -1,12 +1,15 @@
-// components/ClubCard.jsx
+import React from "react";
 
-const ClubCard = ({ name, logo, description, color }) => {
+const ClubCard = (({ name, logo, description, color }) => {
   return (
-    <div className="w-full rounded-2xl border border-black/10 dark:border-white/10 bg-white/80 dark:bg-white/5 p-6 shadow-md backdrop-blur-sm transition-transform hover:scale-[1.02]">
-      
+    <div
+      className={`w-full rounded-2xl border border-black/10 dark:border-white/10 bg-white/80 dark:bg-white/5 p-6 shadow-md transition-transform hover:scale-[1.02] will-change-transform`}
+    >
       {/* Header: Icon + Title */}
       <div className="flex items-center gap-4 mb-4">
-        <div className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center text-white text-xl`}>
+        <div
+          className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center text-white text-xl`}
+        >
           {logo || "🎯"}
         </div>
         <h3 className="text-black dark:text-white text-xl font-semibold">
@@ -16,7 +19,8 @@ const ClubCard = ({ name, logo, description, color }) => {
 
       {/* Description */}
       <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed mb-6">
-        {description || "Club description goes here, explaining what the club does."}
+        {description ||
+          "Club description goes here, explaining what the club does."}
       </p>
 
       {/* Buttons */}
@@ -33,6 +37,6 @@ const ClubCard = ({ name, logo, description, color }) => {
       </div>
     </div>
   );
-};
+});
 
 export default ClubCard;

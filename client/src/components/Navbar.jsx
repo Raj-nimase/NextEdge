@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { User2, Moon, Sun, Menu, X } from "lucide-react";
 import logo from "../assets/logo.png";
 import { Link } from "react-router-dom";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 const Navbar = () => {
   const [darkMode, setDarkMode] = useState(false);
@@ -32,29 +34,28 @@ const Navbar = () => {
   }, [menuOpen]);
 
   // Scroll listener
-useEffect(() => {
-  let ticking = false;
+  useEffect(() => {
+    let ticking = false;
 
-  const handleScroll = () => {
-    const scrolled = window.scrollY > 10;
+    const handleScroll = () => {
+      const scrolled = window.scrollY > 10;
 
-    if (!ticking) {
-      window.requestAnimationFrame(() => {
-        setIsScrolled((prev) => {
-          if (prev !== scrolled) return scrolled;
-          return prev;
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setIsScrolled((prev) => {
+            if (prev !== scrolled) return scrolled;
+            return prev;
+          });
+          ticking = false;
         });
-        ticking = false;
-      });
 
-      ticking = true;
-    }
-  };
+        ticking = true;
+      }
+    };
 
-  window.addEventListener("scroll", handleScroll);
-  return () => window.removeEventListener("scroll", handleScroll);
-}, []);
-
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const navLinks = [
     { label: "Home", href: "/" },
@@ -64,19 +65,23 @@ useEffect(() => {
     { label: "Gallery", href: "/gallery" },
     { label: "Contact", href: "/contact" },
   ];
+  gsap.registerPlugin(ScrollTrigger);
+  const navRef = useRef([]);
+  navRef.current = [];
 
   return (
     <nav
       className={`
         fixed z-50 left-1/2 -translate-x-1/2
         transition-all duration-300 ease-in-out 
-        backdrop-blur-md 
+       
         ${
           isScrolled
-            ? "top-8 w-[80%] rounded-4xl shadow-xl bg-white/80 dark:bg-gray-900/80 border border-white/30 dark:border-gray-700/30"
+            ? "top-8 w-[80%] rounded-4xl shadow-xl bg-white/70 dark:bg-gray-900/80 border border-white/30 dark:border-gray-700/30  backdrop-blur-md "
             : "top-0 w-full rounded-none shadow-none bg-white/70 dark:bg-gray-900/70 border-b border-white/20 dark:border-gray-700/30"
         }
       `}
+      ref={navRef}
     >
       <div
         className={`
