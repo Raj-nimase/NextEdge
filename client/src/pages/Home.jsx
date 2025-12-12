@@ -3,6 +3,7 @@ import { ArrowRight, Lightbulb, Code2, UsersRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { UsersIcon } from "@/components/ui/users";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -107,9 +108,7 @@ const Home = () => {
           {/* Visual 1: Top Left - Abstract Code Block */}
           <div className="absolute top-[15%] -left-[20%] w-48 h-48 bg-gradient-to-tr from-indigo-800 to-indigo-400 dark:bg-gray-800 rounded-lg shadow-xl p-6 transform rotate-[-8deg] ">
             <Code2 className="w-12 h-14 text-yellow-600 dark:text-cyan-400 opacity-60" />
-            <p className="text-2xl mt-2 font-bold text-white">
-              Learning
-            </p>
+            <p className="text-2xl mt-2 font-bold text-white">Learning</p>
           </div>
           {/* Visual 2: Bottom Left - Tagline Box */}
           <div className="absolute bottom-[10%] -left-[20%] w-80 p-6 bg-blue-100/70 dark:bg-blue-900/40 border border-blue-300 dark:border-blue-700 rounded-md transform rotate-[40deg]">
@@ -174,9 +173,8 @@ const Home = () => {
             ref={btnGroupRef}
             className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <button className="px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-black rounded-full font-bold text-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex gap-4">
-              <UsersRound />
-              JOIN US
+            <button className="px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-black rounded-full font-bold text-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 ">
+              <UsersIcon className="flex gap-4 cursor-pointer" title="JOIN US" />
             </button>
 
             <button

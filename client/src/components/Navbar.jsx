@@ -4,7 +4,9 @@ import logo from "../assets/logo.png";
 import { Link } from "react-router-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-
+import { SunIcon } from "./ui/sun";
+import { MoonIcon } from "./ui/moon";
+import { ClubsIcon } from "./ui/clube";
 const Navbar = () => {
   const [darkMode, setDarkMode] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -133,9 +135,12 @@ const Navbar = () => {
             className="rounded-full p-2 hover:bg-gray-200/50 dark:hover:bg-gray-700/50 transition focus:outline-none"
           >
             {darkMode ? (
-              <Sun className="w-5 h-5 text-yellow-400" />
+              <SunIcon className="text-yellow-400" />
             ) : (
-              <Moon className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+              <div className="flex gap-4">
+                <MoonIcon className="text-gray-700 dark:text-gray-300" />
+                <ClubsIcon />
+              </div>
             )}
           </button>
 
