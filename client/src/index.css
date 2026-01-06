@@ -16,9 +16,20 @@
   }
 }
 
+/* @font-face{
+  font-family: 'cool';
+  src: url('/src/assets/fonts/BebasNeue-Regular.ttf') format('truetype');
+  font-display: swap;
+} */
+
 @font-face{
-  font-family: "cool";
-  src: url('/src/assets/fonts/coolvetica/Coolvetica\ Hv\ Comp.otf') format('otf');
+  font-family: 'next';
+  src:url('/Knewave/Knewave-Regular.ttf') format('truetype');
+  font-display: swap;
+}
+@font-face{
+  font-family: 'next2';
+  src:url('/Bangers/Bangers-Regular.ttf') format('truetype');
   font-display: swap;
 }
 
@@ -30,9 +41,19 @@ body {
   overflow-x: hidden; 
 }
 
-/* Add these utility classes if you aren't using Tailwind config for fonts */
-.font-heading { font-family: 'Space Grotesk', sans-serif; }
-.font-body { font-family: 'Outfit', sans-serif; }
+.font-heading {
+  font-family: 'next', cursive;
+}
+
+.font-accent {
+  font-family: 'next2', cursive;
+}
+
+.font-body {
+  font-family: 'Outfit', system-ui, sans-serif;
+}
+
+/* .font-cool{font-family: 'cool',sans-serif; } */
 
 /* --- END OF FILE --- */
 

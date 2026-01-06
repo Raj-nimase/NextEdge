@@ -1,133 +1,141 @@
-import React, { useRef } from "react";
-import { Lightbulb, Users, BookOpen, Share2 } from "lucide-react";
-
-import { useGSAP } from "@gsap/react";
+import { useLayoutEffect, useRef } from "react";
+import { ArrowRight } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const features = [
   {
     title: "Innovation",
-    description:
-      "Fostering innovative thinking across disciplines through collaborative and interdisciplinary learning experiences.",
-    icon: <Lightbulb className="w-8 h-8 text-white" />,
-    gradient: "from-purple-500 to-indigo-600",
+    desc: "Fostering innovative thinking across disciplines through collaborative projects and challenges.",
+    img: "/Innovation.jpg",
   },
   {
     title: "Community",
-    description:
-      "Building a vibrant community of like-minded students, creators, and future leaders.",
-    icon: <Users className="w-8 h-8 text-white" />,
-    gradient: "from-orange-400 to-pink-500",
+    desc: "Building a vibrant community of diverse thinkers, creators, and problem-solvers.",
+    img: "/Community.jpg",
   },
   {
     title: "Learning",
-    description:
-      "Creating opportunities for learning experiences beyond traditional classroom boundaries.",
-    icon: <BookOpen className="w-8 h-8 text-white" />,
-    gradient: "from-blue-500 to-cyan-500",
+    desc: "Creating transformative learning experiences beyond traditional classroom boundaries.",
+    img: "/Learning.jpg",
   },
   {
     title: "Networking",
-    description:
-      "Connecting students with peers, faculty, and industry professionals.",
-    icon: <Share2 className="w-8 h-8 text-white" />,
-    gradient: "from-teal-400 to-green-500",
+    desc: "Connecting students with peers, faculty, and industry professionals.",
+    img: "/Networking.jpg",
   },
 ];
 
-const FeaturesSection = () => {
-  const pageRef = useRef([]);
-  const textRef = useRef();
-  const parentRef = useRef();
-  pageRef.current = [];
+export default function FeaturesSection() {
+  const sectionRef = useRef(null);
 
-  const addToRefs = (el) => {
-    if (el && !pageRef.current.includes(el)) {
-      pageRef.current.push(el);
-    }
-  };
-  useGSAP(() => {
-    pageRef.current.forEach((el) => {
-      gsap.from(el, {
-        y: -50,
+  useLayoutEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.from(".feature-card", {
         opacity: 0,
-        duration: 0.6,
+        y: 80,
+        duration: 1,
+        ease: "power3.out",
         stagger: 0.2,
-        ease: "power2.out",
         scrollTrigger: {
-          scroller: document.body,
-          trigger: el,
-          start: "top 80%",
-          end: "top 30%",
-          markers: true,
-          scrub: 1,
+          trigger: sectionRef.current,
+          start: "top 75%",
+          once: true,
         },
       });
-    });
+    }, sectionRef);
 
-    gsap.to(textRef.current, {
-      x: "-120%",
-      scrollTrigger: {
-        scroller: document.body,
-        trigger: parentRef.current,
-        markers: true,
-        start: "top 0%",
-        end: "top -100%",
-        scrub: 2,
-        pin: true,
-      },
-    });
+    return () => ctx.revert();
   }, []);
 
   return (
-    <>
-      <div
-        className="w-[100%] h-screen bg-blue-400 flex items-center justify-center overflow-x-hidden-hidden"
-        ref={parentRef}
-      >
-        <div className=" w-full">
-          <h2
-            className="text-gray-900 dark:text-white text-[15vw] font-bold whitespace-nowrap transform translate-x-[50%] "
-            ref={textRef}
-          >
-            Welcome to NextEdge Society
-          </h2>
-        </div>
+    <section
+      ref={sectionRef}
+      className="
+    relative py-32
+    bg-gradient-to-b
+    from-gray-50 via-white to-gray-100
+    dark:from-[#0B0B0F] dark:via-[#0F1117] dark:to-[#0B0B0F]
+    text-gray-900 dark:text-gray-100
+    overflow-hidden
+  "
+    >
+      {/* Header */}
+      <div className="relative max-w-6xl mx-auto px-6 mb-28">
+        {/* subtle background accent */}
+        <div className="absolute -top-20 -left-20 w-[300px] h-[300px] bg-blue-500/10 dark:bg-blue-400/10 rounded-full blur-3xl pointer-events-none" />
+
+        {/* badge */}
+        <span
+          className="inline-block mb-6 px-4 py-1 rounded-full text-sm font-semibold tracking-wide
+    bg-blue-100 text-blue-700
+    dark:bg-blue-500/10 dark:text-blue-400"
+        >
+          About Us
+        </span>
+
+        {/* heading */}
+        <h2
+          className="text-5xl md:text-6xl font-bold leading-tight mb-6
+    text-gray-900 dark:text-white"
+        >
+          Welcome to{" "}
+          <span className="text-blue-600 dark:text-blue-400">
+            NextEdge Society
+          </span>
+        </h2>
+
+        {/* description */}
+        <p
+          className="text-lg md:text-xl max-w-3xl leading-relaxed
+    text-gray-600 dark:text-gray-300"
+        >
+          We foster innovation, collaboration, and interdisciplinary learning
+          through student-led clubs, events, and real-world initiatives.
+        </p>
       </div>
 
-      <section className="min-h-screen flex flex-col justify-center bg-white dark:bg-black transition-colors duration-500 py-16 px-6 sm:px-12 lg:px-24">
-        <div className="max-w-full  flex flex-col items-center text-center ">
-          <p className="text-lg md:text-xl text-gray-700 dark:text-gray-300 max-w-4xl mx-auto mb-16">
-            We're a dynamic student organization fostering innovation,
-            collaboration, and interdisciplinary learning through diverse
-            student-led clubs and events.
-          </p>
+      {/* Editorial Card Grid */}
+      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-10">
+        {features.map((f, i) => (
+          <div
+            key={f.title}
+            className={`
+              feature-card
+              relative overflow-hidden rounded-[2.5rem]
+              shadow-[0_30px_80px_rgba(0,0,0,0.12)]
+              ${
+                i % 3 === 0
+                  ? "md:col-span-7 h-[520px]"
+                  : "md:col-span-5 h-[420px]"
+              }
+            `}
+          >
+            {/* Image */}
+            <img
+              src={f.img}
+              alt={f.title}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 mt-10">
-            {features.map((feature, index) => (
-              <div
-                key={index}
-                className="flex flex-col items-center text-center px-6 py-8 rounded-xl shadow-lg bg-gray-100 dark:bg-gray-900 transition-colors duration-300"
-              >
-                <div
-                  className={`w-16 h-16 flex items-center justify-center rounded-full bg-gradient-to-tr ${feature.gradient} mb-6 shadow-md`}
-                >
-                  {feature.icon}
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-700 dark:text-gray-400 text-sm md:text-base">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
+            {/* Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+
+            {/* Content */}
+            <div className="relative z-10 h-full p-10 flex flex-col justify-end text-white">
+              <h3 className="text-3xl font-bold mb-3">{f.title}</h3>
+
+              <p className="text-white/80 max-w-md mb-6">{f.desc}</p>
+
+              <button className="flex items-center gap-2 font-semibold text-lime-300 hover:gap-3 transition-all w-fit">
+                Learn More <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
-        </div>
-      </section>
-    </>
+        ))}
+      </div>
+    </section>
   );
-};
-
-export default FeaturesSection;
+}
