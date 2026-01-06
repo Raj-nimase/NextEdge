@@ -6,33 +6,14 @@ import "swiper/css/effect-fade";
 import "swiper/css/pagination";
 import "swiper/css/thumbs";
 import { FaCalendarAlt, FaMapMarkerAlt } from "react-icons/fa";
-
-const events = [
-  {
-    title: "Startup Pitch Competition",
-    date: "Oct 12, 2025 09:00:00",
-    location: "Business School Auditorium",
-    description:
-      "Showcase your business ideas to potential investors and win seed funding to kickstart your entrepreneurial journey.",
-    image:
-      "https://images.unsplash.com/photo-1531058020387-3be344556be6?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    badge: "Upcoming Event",
-  },
-  {
-    title: "Dance Competition",
-    date: "Sep 15, 2025 11:00:00",
-    location: "Business School Auditorium",
-    description:
-      "Showcase your Dance skills to potential investors and win seed funding to kickstart your journey.",
-    image:
-      "https://images.unsplash.com/photo-1537365587684-f490102e1225?q=80&w=871&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    badge: "Upcoming Event",
-  },
-  // Add more events...
-];
+import axios from "axios";
 
 const UpcomingEvents = () => {
   const thumbsSwiperRef = useRef(null);
+
+  // State for events fetched from backend
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Countdown state
   const [timeLeft, setTimeLeft] = useState({
@@ -45,8 +26,69 @@ const UpcomingEvents = () => {
   // Track which event is active
   const [activeIndex, setActiveIndex] = useState(0);
 
+  // Fetch upcoming events from backend
   useEffect(() => {
-    const targetDate = new Date(events[activeIndex].date).getTime();
+    const fetchUpcomingEvents = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(
+          "http://localhost:3000/api/events/upcoming"
+        );
+
+        if (response.data.success && response.data.events) {
+          // Transform backend data to match UI structure
+          const transformedEvents = response.data.events.map((event) => ({
+            title: event.title,
+            date: new Date(event.date).toLocaleString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            }),
+            dateObj: new Date(event.date), // Keep original date object for countdown
+            location: event.location || "Location TBA",
+            description: event.description || "No description available",
+            image:
+              event.images && event.images.length > 0
+                ? event.images[0].url
+                : "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            badge: "Upcoming Event",
+          }));
+
+          setEvents(transformedEvents);
+        }
+      } catch (err) {
+        console.error("Error fetching upcoming events:", err);
+        // Set fallback events in case of error
+        setEvents([
+          {
+            title: "No Events Available",
+            date: "TBA",
+            dateObj: new Date(),
+            location: "TBA",
+            description: "Check back soon for upcoming events!",
+            image:
+              "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            badge: "Coming Soon",
+          },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUpcomingEvents();
+  }, []);
+
+  useEffect(() => {
+    if (events.length === 0 || !events[activeIndex]?.dateObj) {
+      setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+      return;
+    }
+
+    const targetDate = events[activeIndex].dateObj.getTime();
 
     const updateCountdown = () => {
       const now = Date.now();
@@ -69,7 +111,21 @@ const UpcomingEvents = () => {
     const interval = setInterval(updateCountdown, 1000);
 
     return () => clearInterval(interval);
-  }, [activeIndex]); // Re-run when active event changes
+  }, [activeIndex, events]); // Re-run when active event changes or events load
+
+  // Show loading state
+  if (loading) {
+    return (
+      <section className="py-20 px-4 sm:px-[5vw] bg-white text-black dark:bg-black dark:text-white transition-colors duration-300">
+        <div className="max-w-6xl mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Upcoming Events
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">Loading events...</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-20 px-4 sm:px-[5vw] bg-white text-black dark:bg-black dark:text-white transition-colors duration-300">

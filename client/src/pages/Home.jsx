@@ -1,13 +1,9 @@
-import React, { useRef, useLayoutEffect } from "react";
-import { ArrowRight, Lightbulb, Code2, UsersRound } from "lucide-react";
+import React from "react";
+import { ArrowRight, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { UsersIcon } from "@/components/ui/users";
 
-gsap.registerPlugin(ScrollTrigger);
-
-// Import components (assuming paths are correct)
 import FeaturesSection from "../components/FeaturesSection";
 import Clubs from "../components/Clubs";
 import UpcomingEvents from "../components/UpcomingEvents";
@@ -16,185 +12,225 @@ import Footer from "../components/Footer";
 
 const Home = () => {
   const navigate = useNavigate();
-  const mainRef = useRef(null);
-
-  // Refs for animation targeting
-  const titleLine1Ref = useRef(null);
-  const titleLine2Ref = useRef(null);
+  const heroRef = useRef(null);
+  const badgeRef = useRef(null);
+  const headlineRefs = useRef([]);
   const descRef = useRef(null);
-  const btnGroupRef = useRef(null);
-  const visualsRef = useRef(null); // Ref for the asymmetric grid items
+  const ctaRef = useRef(null);
+  const stickerRefs = useRef([]);
+  const cardRefs = useRef([]);
+
+  headlineRefs.current = [];
+  stickerRefs.current = [];
+  cardRefs.current = [];
+
+  const addHeadline = (el) => el && headlineRefs.current.push(el);
+  const addSticker = (el) => el && stickerRefs.current.push(el);
+  const addCard = (el) => el && cardRefs.current.push(el);
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-
-      // 1. Initial State Set
-      gsap.set([titleLine1Ref.current, titleLine2Ref.current], {
-        y: 200,
-        opacity: 0,
-      });
-      gsap.set(descRef.current, { opacity: 0 });
-      gsap.set(btnGroupRef.current, { opacity: 0, y: 20 });
-      gsap.set(visualsRef.current.children, {
-        opacity: 0,
-        scale: 0.8,
-        rotation: "random(-5, 5)",
+      const tl = gsap.timeline({
+        defaults: { ease: "power3.out" },
       });
 
-      // 2. The Animation Sequence
+      // Initial states
+      gsap.set(badgeRef.current, { opacity: 0, y: 20 });
+      gsap.set(headlineRefs.current, { y: 120, opacity: 0 });
+      gsap.set(stickerRefs.current, { scale: 0.8, opacity: 0 });
+      gsap.set(descRef.current, { opacity: 0, y: 20 });
+      gsap.set(ctaRef.current, { opacity: 0, y: 20 });
+      gsap.set(cardRefs.current, { opacity: 0, y: 40 });
 
-      // Step A: Background Visuals Pop
-      tl.to(visualsRef.current.children, {
+      // Timeline
+      tl.to(badgeRef.current, {
         opacity: 1,
-        scale: 1,
-        duration: 0.8,
-        stagger: 0.1,
-        ease: "back.out(1.7)",
-      });
-
-      // Step B: Text "Mask Reveal" (Slide up)
-      tl.to(
-        [titleLine1Ref.current, titleLine2Ref.current],
-        {
-          y: 0,
-          stagger: 0.1,
-          opacity: 1,
-          duration: 1,
-          ease: "power4.out",
-        },
-        "-=0.6"
-      );
-
-      // Step C: Description fades in
-      tl.to(
-        descRef.current,
-        {
-          opacity: 1,
-          duration: 0.8,
-        },
-        "-=0.5"
-      );
-
-      // Step D: Buttons pop up
-      tl.to(
-        btnGroupRef.current,
-        {
+        y: 0,
+        duration: 0.5,
+      })
+        .to(
+          headlineRefs.current,
+          {
+            y: 0,
+            opacity: 1,
+            duration: 1,
+            stagger: 0.12,
+          },
+          "-=0.2"
+        )
+        .to(
+          stickerRefs.current,
+          {
+            opacity: 1,
+            scale: 1,
+            duration: 0.6,
+            stagger: 0.15,
+          },
+          "-=0.6"
+        )
+        .to(descRef.current, {
           opacity: 1,
           y: 0,
-          duration: 0.7,
-          ease: "power2.out",
-        },
-        "-=0.4"
-      );
-    }, mainRef);
+          duration: 0.6,
+        })
+        .to(
+          ctaRef.current,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+          },
+          "-=0.3"
+        )
+        .to(
+          cardRefs.current,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.7,
+            stagger: 0.15,
+          },
+          "-=0.2"
+        );
+    }, heroRef);
 
     return () => ctx.revert();
   }, []);
 
   return (
-    // Minimalist theme: High contrast and clean background
-    <div
-      ref={mainRef}
-      className="home-page-containerdark:bg-black transition-colors duration-500 font-body h-screen bg-[url(/bg1.png)] bg-cover dark:bg-[url(/dark-bg.png)]"
-    >
-      {/* HERO SECTION */}
-      <main className="relative min-h-screen flex items-center justify-center overflow-hidden py-32 md:py-0">
-        {/* === BACKGROUND VISUALS (The Asymmetric Elements) === */}
-        <div
-          ref={visualsRef}
-          className="absolute inset-0 max-w-7xl mx-auto pointer-events-none"
-        >
-          {/* Visual 1: Top Left - Abstract Code Block */}
-          <div className="absolute top-[15%] -left-[20%] w-48 h-48 bg-gradient-to-tr from-indigo-800 to-indigo-400 dark:bg-gray-800 rounded-lg shadow-xl p-6 transform rotate-[-8deg] ">
-            <Code2 className="w-12 h-14 text-yellow-600 dark:text-cyan-400 opacity-60" />
-            <p className="text-2xl mt-2 font-bold text-white">Learning</p>
-          </div>
-          {/* Visual 2: Bottom Left - Tagline Box */}
-          <div className="absolute bottom-[10%] -left-[20%] w-80 p-6 bg-blue-100/70 dark:bg-blue-900/40 border border-blue-300 dark:border-blue-700 rounded-md transform rotate-[40deg]">
-            <p className="text-m font-semibold text-blue-800 dark:text-blue-300">
-              "Good Ideas Modus"
-            </p>
-          </div>
-          {/* Visual 3: Bottom Right - Abstract Idea Bulb */}
-          <div className="absolute bottom-[20%] right-[-15%] w-56 h-36 bg-gradient-to-br from-red-400 to-yellow-400 dark:bg-gray-800 rounded-xl shadow-2xl p-4 flex items-center justify-end gap-2 transform rotate-[4deg]">
-            <span className="font-bold text-2xl text-white">Innovation</span>
-            <Lightbulb className="w-10 h-10 text-white" />
-          </div>
-        </div>
+    <div className="bg-[#0B0B0F] text-white font-body">
+      {/* ================= HERO ================= */}
+      <section
+        className="relative min-h-screen bg-[#0A4BFF] overflow-hidden"
+        ref={heroRef}
+      >
+        {/* grid texture */}
+        <div className="absolute inset-0 opacity-40 bg-[linear-gradient(90deg,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[size:40px_40px]" />
 
-        {/* === CONTENT LAYER (Center Focus) === */}
-        <section className="relative z-20 max-w-5xl mx-auto px-6 text-center">
+        <div className="relative max-w-7xl mx-auto px-6 pt-32 pb-24 text-white">
           {/* Badge */}
-          <div className="inline-block px-3 py-1 rounded-full bg-blue-500/10 dark:bg-blue-400/10 text-blue-600 dark:text-blue-400 text-sm font-semibold uppercase tracking-widest mb-10">
+          <span
+            className="inline-block mb-3 px-2 md:mb-6 md:px-4 md:py-1 rounded-full font-bold bg-white text-blue-600 text-xs uppercase "
+            ref={badgeRef}
+          >
             Student Innovation Hub
-          </div>
+          </span>
 
-          {/* Heading with MASK REVEAL effect - Big and Bold */}
-          <h1 className="font-heading text-6xl md:text-9xl font-black leading-none text-gray-900 dark:text-white mb-6 tracking-tighter uppercase">
-            {/* Line 1 Wrapper: Tilted left with a subtle purple/blue gradient glow */}
-            <div
-              className="overflow-hidden transform -rotate-1 skew-x-1 relative z-10 
-               bg-gradient-to-bl from-red-200 dark:from-purple-700 to-white dark:to-gray-500 mb-4
-               p-6 rounded-xl shadow-xl"
+          {/* Headline */}
+          <h1 className="leading-[0.95] uppercase">
+            <span
+              className="block font-heading text-5xl md:text-8xl"
+              ref={addHeadline}
             >
-              <div ref={titleLine1Ref} className="block">
-                Edge of Innovation.
-              </div>
-            </div>
-
-            {/* Line 2 Wrapper: Tilted right, pulled up, with a cyan/blue ambient glow */}
-            <div
-              className="overflow-hidden transform rotate-1 -mt-8 relative z-0 
-               bg-gradient-to-br from-cyan-200 dark:from-sky-400 to-white dark:to-gray-900
-               p-6 rounded-xl shadow-xl"
+              Edge of
+            </span>
+            <span
+              className="block font-heading text-5xl tracking-wide md:text-8xl"
+              ref={addHeadline}
             >
-              <div
-                ref={titleLine2Ref}
-                className="block bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text dark:text-yellow-300/70 text-transparent"
-              >
-                Core of Learning.
-              </div>
-            </div>
+              Innovation
+            </span>
+            <span
+              className="block font-accent text-6xl tracking-wide md:text-9xl text-lime-300"
+              ref={addHeadline}
+            >
+              Core of Learning
+            </span>
           </h1>
 
-          {/* Subtitle/Description - Centered below the bold text */}
+          {/* Floating stickers */}
+          <div
+            className="absolute top-28 right-20 rotate-12 bg-white text-black px-4 py-2 rounded-xl font-bold shadow-xl hidden md:block"
+            ref={addSticker}
+          >
+            Learning
+          </div>
+
+          <div
+            className="absolute  -left-40 bottom-90 -rotate-30 bg-lime-400 text-black px-4 py-2 rounded-full font-bold shadow-xl hidden md:block"
+            ref={addSticker}
+          >
+            Innovation
+          </div>
+
+          {/* Description */}
           <p
+            className="mt-8 max-w-xl text-sm md:text-lg text-blue-100"
             ref={descRef}
-            className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-lg mx-auto leading-relaxed mt-8"
           >
             A dynamic student organization dedicated to promoting
             interdisciplinary learning and innovation through various
             student-led sub-clubs and events.
           </p>
 
-          {/* Action Buttons */}
-          <div
-            ref={btnGroupRef}
-            className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
-          >
-            <button className="px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-black rounded-full font-bold text-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 ">
-              <UsersIcon className="flex gap-4 cursor-pointer" title="JOIN US" />
+          {/* CTAs */}
+          <div className="mt-10 flex flex-col sm:flex-row gap-4" ref={ctaRef}>
+            <button className="px-8 py-4 bg-black text-white rounded-full font-bold hover:scale-[1.03] transition">
+              Join Us
             </button>
 
             <button
               onClick={() => navigate("/clubs")}
-              className="px-8 py-4 bg-transparent border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-white rounded-full font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 flex items-center gap-2 group"
+              className="px-8 py-4 bg-white text-black rounded-full font-bold flex items-center gap-2 hover:scale-[1.03] transition"
             >
-              <span>Explore Clubs</span>
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+              Explore Clubs →
             </button>
           </div>
-        </section>
-      </main>
 
-      {/* Main Content Sections */}
-      <div className="bg-white dark:bg-black text-gray-900 dark:text-gray-100 transition-colors duration-500">
+          {/* Value Cards */}
+          <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div
+              className="bg-white text-black rounded-2xl p-6 shadow-xl"
+              ref={addCard}
+            >
+              <h3 className="font-bold text-lg mb-2">Learn</h3>
+              <p className="text-sm text-gray-700">
+                Interdisciplinary learning through hands-on collaboration.
+              </p>
+            </div>
+
+            <div
+              className="bg-white text-black rounded-2xl p-6 shadow-xl"
+              ref={addCard}
+            >
+              <h3 className="font-bold text-lg mb-2">Build</h3>
+              <p className="text-sm text-gray-700">
+                Student-led clubs working on real ideas and projects.
+              </p>
+            </div>
+
+            <div
+              className="bg-white text-black rounded-2xl p-6 shadow-xl"
+              ref={addCard}
+            >
+              <h3 className="font-bold text-lg mb-2">Innovate</h3>
+              <p className="text-sm text-gray-700">
+                Events and initiatives that push creativity forward.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ================= FEATURES ================= */}
+      <section className="bg-white text-gray-900">
         <FeaturesSection />
+      </section>
+
+      {/* ================= CLUBS ================= */}
+      <section className="bg-white text-gray-900">
         <Clubs />
+      </section>
+
+      {/* ================= EVENTS ================= */}
+      <section className="bg-white text-gray-900">
         <UpcomingEvents />
+      </section>
+
+      {/* ================= CTA ================= */}
+      <section className="bg-[#0B0B0F]">
         <Cta />
-      </div>
+      </section>
 
       <Footer />
     </div>
