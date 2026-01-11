@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Contact from "./pages/Contact";
 import Events from "./pages/Events";
 import AdminEventsPage from "./pages/AdminEventsPage";
+import AdminContactPage from "./pages/AdminContactPage";
 import AdminLogin from "./pages/AdminLogin";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
@@ -31,6 +32,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <AdminEventsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/contacts"
+            element={
+              <ProtectedRoute>
+                <AdminContactPage />
               </ProtectedRoute>
             }
           />

@@ -1,6 +1,7 @@
 import express from "express";
 import eventRoutes from "./events/event.routes.js";
 import adminRoutes from "./Admin/admin.routes.js";
+import contactRoutes from "./contacts/contact.routes.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
@@ -20,6 +21,7 @@ app.use(
 app.use(express.json());
 app.use("/api/admin", adminRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/contacts", contactRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");

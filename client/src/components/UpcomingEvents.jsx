@@ -35,7 +35,11 @@ const UpcomingEvents = () => {
           "http://localhost:3000/api/events/upcoming"
         );
 
-        if (response.data.success && response.data.events) {
+        if (
+          response.data.success &&
+          response.data.events &&
+          response.data.events.length > 0
+        ) {
           // Transform backend data to match UI structure
           const transformedEvents = response.data.events.map((event) => ({
             title: event.title,
@@ -58,6 +62,20 @@ const UpcomingEvents = () => {
           }));
 
           setEvents(transformedEvents);
+        } else {
+          // No events available - set fallback
+          setEvents([
+            {
+              title: "No Events Available",
+              date: "TBA",
+              dateObj: new Date(),
+              location: "TBA",
+              description: "Check back soon for upcoming events!",
+              image:
+                "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+              badge: "Coming Soon",
+            },
+          ]);
         }
       } catch (err) {
         console.error("Error fetching upcoming events:", err);
@@ -163,7 +181,7 @@ const UpcomingEvents = () => {
           effect="fade"
           fadeEffect={{ crossFade: true }}
           autoplay={{ delay: 5000, disableOnInteraction: false }}
-          loop
+          loop={events.length > 1}
           pagination={{ clickable: true }}
           thumbs={{ swiper: thumbsSwiperRef.current }}
           onSwiper={(swiper) => {
@@ -178,7 +196,7 @@ const UpcomingEvents = () => {
         >
           {events.map((event, index) => (
             <SwiperSlide key={index}>
-              <div className="flex flex-col md:flex-row bg-white dark:bg-white/5 shadow-md rounded-xl overflow-hidden transition-colors duration-300">
+              <div className="flex flex-col md:flex-row bg-white dark:bg-white/5 shadow-md rounded-xl overflow-hidden transition-colors duration-300 min-h-[300px] md:min-h-0">
                 <div className="md:w-1/2 h-60 md:h-auto">
                   <img
                     src={event.image}

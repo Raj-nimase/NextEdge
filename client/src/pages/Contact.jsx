@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Clock } from 'lucide-react';
+import axios from 'axios';
 import Footer from '../components/Footer';
 
 // --- Data Definitions ---
@@ -256,7 +257,7 @@ const Contact = () => {
     }
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = activeTab === 'membership' ? membershipForm : volunteerForm;
     
@@ -266,13 +267,38 @@ const Contact = () => {
         return;
     }
 
-    // In a real application, you would send this data to a backend API or Firestore
-    console.log(`Submitting ${activeTab} form data:`, formData);
+    // Additional validation for membership form
+    if (activeTab === 'membership' && formData.interests.length === 0) {
+        setFormMessage("Please select at least one club interest.");
+        return;
+    }
 
-    setFormMessage('Request submitted successfully!');
-    resetFormState();
-    
-    setTimeout(() => setFormMessage(''), 5000);
+    // Additional validation for volunteer form
+    if (activeTab === 'volunteer' && formData.interestArea === INTEREST_AREAS[0]) {
+        setFormMessage("Please select an area of interest.");
+        return;
+    }
+
+    try {
+        const endpoint = activeTab === 'membership' 
+            ? 'http://localhost:3000/api/contacts/membership'
+            : 'http://localhost:3000/api/contacts/volunteer';
+        
+        const response = await axios.post(endpoint, formData);
+        
+        if (response.data.success) {
+            setFormMessage('Request submitted successfully!');
+            resetFormState();
+            setTimeout(() => setFormMessage(''), 5000);
+        }
+    } catch (error) {
+        console.error('Error submitting form:', error);
+        setFormMessage(
+            error.response?.data?.message || 
+            'Failed to submit request. Please try again later.'
+        );
+        setTimeout(() => setFormMessage(''), 5000);
+    }
   };
 
   return (

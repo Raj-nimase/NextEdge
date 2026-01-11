@@ -31,7 +31,10 @@ const Home = () => {
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
-        defaults: { ease: "power3.out" },
+        defaults: {
+          ease: "power3.out",
+          duration: 0.6,
+        },
       });
 
       // Initial states
@@ -43,54 +46,73 @@ const Home = () => {
       gsap.set(cardRefs.current, { opacity: 0, y: 40 });
 
       // Timeline
-      tl.to(badgeRef.current, {
-        opacity: 1,
-        y: 0,
-        duration: 0.5,
-      })
+
+      tl.addLabel("start")
+        .to(
+          badgeRef.current,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.4,
+          },
+          "start"
+        )
+
         .to(
           headlineRefs.current,
           {
             y: 0,
             opacity: 1,
-            duration: 1,
-            stagger: 0.12,
+            stagger: 0.08,
+            duration: 0.8,
           },
-          "-=0.2"
+          "start+=0.1"
         )
+
+        // Stickers jump in early, not later
         .to(
           stickerRefs.current,
           {
             opacity: 1,
             scale: 1,
-            duration: 0.6,
-            stagger: 0.15,
+            stagger: 0.12,
+            duration: 0.5,
           },
-          "-=0.6"
+          "start+=0.2"
         )
-        .to(descRef.current, {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-        })
+
+        // Description overlaps headline tail
+        .to(
+          descRef.current,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.5,
+          },
+          "start+=0.35"
+        )
+
+        // CTA should feel eager, not patient
         .to(
           ctaRef.current,
           {
             opacity: 1,
             y: 0,
-            duration: 0.6,
+            duration: 0.5,
           },
-          "-=0.3"
+          "start+=0.45"
         )
+
+        // Cards flow in while CTA finishes
         .to(
           cardRefs.current,
           {
             opacity: 1,
             y: 0,
-            duration: 0.7,
-            stagger: 0.15,
+            stagger: 0.12,
+            duration: 0.6,
           },
-          "-=0.2"
+          "start+=0.55"
         );
     }, heroRef);
 
@@ -98,40 +120,37 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="bg-[#0B0B0F] text-white font-body">
+    <div className="font-body">
       {/* ================= HERO ================= */}
       <section
-        className="relative min-h-screen bg-[#0A4BFF] overflow-hidden"
+        className="relative min-h-screen   md:dark:bg-[url('/darkbg.png')] md:bg-[url('/bg1.png')] md:bg-cover overflow-hidden"
         ref={heroRef}
       >
-        {/* grid texture */}
-        <div className="absolute inset-0 opacity-40 bg-[linear-gradient(90deg,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[size:40px_40px]" />
-
-        <div className="relative max-w-7xl mx-auto px-6 pt-32 pb-24 text-white">
+        <div className="relative flex flex-col items-center max-w-7xl mx-auto px-6 pt-22 md:pt-28 pb-24  ">
           {/* Badge */}
           <span
-            className="inline-block mb-3 px-2 md:mb-6 md:px-4 md:py-1 rounded-full font-bold bg-white text-blue-600 text-xs uppercase "
+            className="inline-block mb-3 px-2 md:mb-6 md:px-4 md:py-1 rounded-full font-bold bg-blue-100 text-blue-600 text-xs uppercase "
             ref={badgeRef}
           >
             Student Innovation Hub
           </span>
 
           {/* Headline */}
-          <h1 className="leading-[0.95] uppercase">
+          <h1 className=" uppercase">
             <span
-              className="block font-heading text-5xl md:text-8xl"
+              className="block font-accent text-6xl md:text-9xl"
               ref={addHeadline}
             >
               Edge of
             </span>
             <span
-              className="block font-heading text-5xl tracking-wide md:text-8xl"
+              className="block font-accent text-6xl tracking-wide md:text-9xl"
               ref={addHeadline}
             >
               Innovation
             </span>
             <span
-              className="block font-accent text-6xl tracking-wide md:text-9xl text-lime-300"
+              className="block font-accent text-6xl tracking-wide md:text-9xl text-blue-600"
               ref={addHeadline}
             >
               Core of Learning
@@ -155,7 +174,7 @@ const Home = () => {
 
           {/* Description */}
           <p
-            className="mt-8 max-w-xl text-sm md:text-lg text-blue-100"
+            className="mt-8 max-w-xl md:mr-45 text-sm md:text-lg dark:text-blue-100 md:mt-6"
             ref={descRef}
           >
             A dynamic student organization dedicated to promoting
@@ -164,23 +183,26 @@ const Home = () => {
           </p>
 
           {/* CTAs */}
-          <div className="mt-10 flex flex-col sm:flex-row gap-4" ref={ctaRef}>
+          <div
+            className="mt-10 md:mt-8 md:w-3xl flex flex-col sm:flex-row gap-4"
+            ref={ctaRef}
+          >
             <button className="px-8 py-4 bg-black text-white rounded-full font-bold hover:scale-[1.03] transition">
               Join Us
             </button>
 
             <button
               onClick={() => navigate("/clubs")}
-              className="px-8 py-4 bg-white text-black rounded-full font-bold flex items-center gap-2 hover:scale-[1.03] transition"
+              className="px-8 py-4 bg-gray-100/50 dark:bg-white text-black shadow-xl rounded-full font-bold flex items-center gap-2 hover:scale-[1.03] transition"
             >
               Explore Clubs →
             </button>
           </div>
 
           {/* Value Cards */}
-          <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="mt-20 md:mt-14 grid grid-cols-1 md:grid-cols-3 gap-6">
             <div
-              className="bg-white text-black rounded-2xl p-6 shadow-xl"
+              className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200"
               ref={addCard}
             >
               <h3 className="font-bold text-lg mb-2">Learn</h3>
@@ -190,7 +212,7 @@ const Home = () => {
             </div>
 
             <div
-              className="bg-white text-black rounded-2xl p-6 shadow-xl"
+              className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200"
               ref={addCard}
             >
               <h3 className="font-bold text-lg mb-2">Build</h3>
@@ -200,7 +222,7 @@ const Home = () => {
             </div>
 
             <div
-              className="bg-white text-black rounded-2xl p-6 shadow-xl"
+              className="bg-white text-black rounded-2xl p-6 shadow-xl border border-gray-200"
               ref={addCard}
             >
               <h3 className="font-bold text-lg mb-2">Innovate</h3>
@@ -228,7 +250,7 @@ const Home = () => {
       </section>
 
       {/* ================= CTA ================= */}
-      <section className="bg-[#0B0B0F]">
+      <section>
         <Cta />
       </section>
 
