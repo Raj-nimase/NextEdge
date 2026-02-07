@@ -53,113 +53,117 @@ const Events = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 pt-20">
-      <div className="w-full mx-auto space-y-14 md:px-30">
-        {/* ERROR */}
-        {error && (
-          <div className="bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 p-4 rounded-lg">
-            {error}
-          </div>
-        )}
+    <>
+      <div className="min-h-screen pt-30">
+        <div className="w-full mx-auto space-y-14 md:px-30">
+          {/* ERROR */}
+          {error && (
+            <div className="bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 p-4 rounded-lg">
+              {error}
+            </div>
+          )}
 
-        {/* UPCOMING EVENTS */}
-        <section>
-          <h2 className="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">
-            Upcoming Events
-          </h2>
+          {/* UPCOMING EVENTS */}
+          <section>
+            <h2 className="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">
+              Upcoming Events
+            </h2>
 
-          {upcomingEvents.length === 0 ? (
-            <p className="text-gray-600 dark:text-gray-400">
-              No upcoming events.
-            </p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {upcomingEvents.map((event) => (
-                <div
-                  key={event._id}
-                  onClick={() => setSelectedEvent(event)}
-                  className="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden
+            {upcomingEvents.length === 0 ? (
+              <p className="text-gray-600 dark:text-gray-400">
+                No upcoming events.
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {upcomingEvents.map((event) => (
+                  <div
+                    key={event._id}
+                    onClick={() => setSelectedEvent(event)}
+                    className="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden
   cursor-pointer hover:scale-[1.02] transition"
-                >
-                  {/* ✅ EVENT IMAGE (FIRST IMAGE ONLY) */}
-                  {event.images?.length > 0 ? (
-                    <img
-                      src={event.images[0].url}
-                      alt={event.title}
-                      className="h-48 w-full object-cover"
-                    />
-                  ) : (
-                    <div className="h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-500">
-                      No Image
+                  >
+                    {/* ✅ EVENT IMAGE (FIRST IMAGE ONLY) */}
+                    {event.images?.length > 0 ? (
+                      <img
+                        src={event.images[0].url}
+                        alt={event.title}
+                        className="h-48 w-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-500">
+                        No Image
+                      </div>
+                    )}
+
+                    <div className="p-5">
+                      <h3 className="font-semibold text-lg text-gray-800 dark:text-gray-100">
+                        {event.title}
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        {new Date(event.date).toDateString()}
+                      </p>
                     </div>
-                  )}
-
-                  <div className="p-5">
-                    <h3 className="font-semibold text-lg text-gray-800 dark:text-gray-100">
-                      {event.title}
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      {new Date(event.date).toDateString()}
-                    </p>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+                ))}
+              </div>
+            )}
+          </section>
 
-        {/* PAST EVENTS */}
-        <section>
-          <h2 className="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">
-            Past Events
-          </h2>
+          {/* PAST EVENTS */}
+          <section>
+            <h2 className="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">
+              Past Events
+            </h2>
 
-          {pastEvents.length === 0 ? (
-            <p className="text-gray-600 dark:text-gray-400">No past events.</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {pastEvents.map((event) => (
-                <div
-                  key={event._id}
-                  onClick={() => setSelectedEvent(event)}
-                  className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 space-y-4
+            {pastEvents.length === 0 ? (
+              <p className="text-gray-600 dark:text-gray-400">
+                No past events.
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {pastEvents.map((event) => (
+                  <div
+                    key={event._id}
+                    onClick={() => setSelectedEvent(event)}
+                    className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 space-y-4
   cursor-pointer hover:shadow-lg transition"
-                >
-                  <div>
-                    <h3 className="font-semibold text-xl text-gray-800 dark:text-gray-100">
-                      {event.title}
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      {new Date(event.date).toDateString()}
-                    </p>
-                  </div>
-
-                  {/* ✅ EVENT IMAGE (FIRST IMAGE ONLY) */}
-                  {event.images?.length > 0 ? (
-                    <img
-                      src={event.images[0].url}
-                      alt={event.title}
-                      className="h-48 w-full object-cover"
-                    />
-                  ) : (
-                    <div className="h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-500">
-                      No Image
+                  >
+                    <div>
+                      <h3 className="font-semibold text-xl text-gray-800 dark:text-gray-100">
+                        {event.title}
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        {new Date(event.date).toDateString()}
+                      </p>
                     </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-          {selectedEvent && (
-            <EventDetailModal
-              event={selectedEvent}
-              onClose={() => setSelectedEvent(null)}
-            />
-          )}
-        </section>
-        <Footer />
+
+                    {/* ✅ EVENT IMAGE (FIRST IMAGE ONLY) */}
+                    {event.images?.length > 0 ? (
+                      <img
+                        src={event.images[0].url}
+                        alt={event.title}
+                        className="h-48 w-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-500">
+                        No Image
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            {selectedEvent && (
+              <EventDetailModal
+                event={selectedEvent}
+                onClose={() => setSelectedEvent(null)}
+              />
+            )}
+          </section>
+        </div>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 };
 

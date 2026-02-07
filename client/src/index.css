@@ -33,6 +33,11 @@
   font-display: swap;
 }
 
+@font-face{
+  font-family: 'next3';
+  src:url('/yoxall_b.ttf') format('truetype');
+  font-display: swap;
+}
 /* 4. NON-LAYERED, NON-TAILWIND CUSTOM CSS */
 body {
   margin: 0;
@@ -47,6 +52,9 @@ body {
 
 .font-accent {
   font-family: 'next2', cursive;
+}
+.font-next3{
+  font-family: 'next3', cursive;
 }
 
 .font-body {
