@@ -1,5 +1,6 @@
 import { useState } from "react";
-import axios from "axios";
+import { api } from "../api/axios.js";
+import { isValidYoutubeUrl } from "../utils/youtube.js";
 
 const AdminEventEditModal = ({ event, onClose, onUpdated }) => {
   const [title, setTitle] = useState(event.title);
@@ -23,7 +24,7 @@ const AdminEventEditModal = ({ event, onClose, onUpdated }) => {
         return;
       }
 
-      await axios.put(`http://localhost:3000/api/events/${event._id}`, {
+      await api.put(`/events/${event._id}`, {
         title,
         description,
         date,
@@ -35,10 +36,7 @@ const AdminEventEditModal = ({ event, onClose, onUpdated }) => {
         const mediaData = new FormData();
         newImages.forEach((img) => mediaData.append("images", img));
 
-        await axios.patch(
-          `http://localhost:3000/api/events/${event._id}/media`,
-          mediaData
-        );
+        await api.patch(`/events/${event._id}/media`, mediaData);
       }
 
       onUpdated();
@@ -48,30 +46,9 @@ const AdminEventEditModal = ({ event, onClose, onUpdated }) => {
     }
   };
 
-  const isValidYoutubeUrl = (url) => {
-    // Handle regular YouTube URLs
-    const regExp =
-      /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
-    if (match && match[2].length === 11) {
-      return true;
-    }
-
-    // Handle YouTube Shorts URLs
-    const shortsRegExp = /\/shorts\/([^#&?/]*)/;
-    const shortsMatch = url.match(shortsRegExp);
-    if (shortsMatch && shortsMatch[1] && shortsMatch[1].length === 11) {
-      return true;
-    }
-
-    return false;
-  };
-
   const deleteMedia = async (publicId) => {
-    axios.delete(
-      `http://localhost:3000/api/events/${event._id}/media/${encodeURIComponent(
-        publicId
-      )}`
+    await api.delete(
+      `/events/${event._id}/media/${encodeURIComponent(publicId)}`
     );
 
     onUpdated();

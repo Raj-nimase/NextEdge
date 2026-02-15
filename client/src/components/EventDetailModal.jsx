@@ -1,25 +1,7 @@
+import { getYoutubeVideoId } from "../utils/youtube.js";
+
 const EventDetailModal = ({ event, onClose }) => {
   if (!event) return null;
-
-  // Function to extract YouTube video ID from URL (including Shorts)
-  const getYoutubeVideoId = (url) => {
-    // Handle regular YouTube URLs
-    const regExp =
-      /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
-    if (match && match[2].length === 11) {
-      return match[2];
-    }
-
-    // Handle YouTube Shorts URLs
-    const shortsRegExp = /\/shorts\/([^#&?/]*)/;
-    const shortsMatch = url.match(shortsRegExp);
-    if (shortsMatch && shortsMatch[1] && shortsMatch[1].length === 11) {
-      return shortsMatch[1];
-    }
-
-    return null;
-  };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-4">

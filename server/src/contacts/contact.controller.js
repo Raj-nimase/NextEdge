@@ -3,16 +3,32 @@ import { Membership, Volunteer } from "./contact.model.js";
 // CREATE MEMBERSHIP APPLICATION
 export const createMembership = async (req, res) => {
   try {
+    const { name, email, year, interests } = req.body;
+
+    if (!name || !email || !year) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, email and year are required",
+      });
+    }
+
+    if (!Array.isArray(interests) || interests.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Please select at least one interest",
+      });
+    }
+
     const membership = await Membership.create(req.body);
-    res.status(201).json({ 
-      success: true, 
+    res.status(201).json({
+      success: true,
       message: "Membership application submitted successfully",
-      membership 
+      membership,
     });
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
+    res.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 };
@@ -20,16 +36,25 @@ export const createMembership = async (req, res) => {
 // CREATE VOLUNTEER APPLICATION
 export const createVolunteer = async (req, res) => {
   try {
+    const { name, email, year, interestArea } = req.body;
+
+    if (!name || !email || !year || !interestArea) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, email, year and interest area are required",
+      });
+    }
+
     const volunteer = await Volunteer.create(req.body);
-    res.status(201).json({ 
-      success: true, 
+    res.status(201).json({
+      success: true,
       message: "Volunteer application submitted successfully",
-      volunteer 
+      volunteer,
     });
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
+    res.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 };

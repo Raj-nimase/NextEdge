@@ -1,13 +1,22 @@
 import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+
 import eventRoutes from "./events/event.routes.js";
 import adminRoutes from "./Admin/admin.routes.js";
 import contactRoutes from "./contacts/contact.routes.js";
-import cors from "cors";
-import cookieParser from "cookie-parser";
 
 const app = express();
+
+// Parse cookies early so auth and other middleware can use them
 app.use(cookieParser());
 
+// Security headers
+app.use(helmet());
+
+// CORS with credentials support
 app.use(
   cors({
     origin:
@@ -18,13 +27,44 @@ app.use(
   })
 );
 
+// Global rate limiting for API routes
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 100,
+});
+
+// Stricter limiter for login to mitigate brute-force
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+});
+
+app.use("/api", apiLimiter);
+app.use("/api/admin/login", loginLimiter);
+
 app.use(express.json());
+
+// Routes
 app.use("/api/admin", adminRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/contacts", contactRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
+});
+
+// Centralized error handler
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  console.error(err);
+
+  const status = err.status || err.statusCode || 500;
+  const message = err.message || "Internal Server Error";
+
+  res.status(status).json({
+    success: false,
+    message,
+  });
 });
 
 export default app;

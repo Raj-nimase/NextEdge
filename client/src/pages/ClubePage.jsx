@@ -10,6 +10,7 @@ import {
   Dumbbell,
   UtensilsCrossed,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Footer from "../components/Footer";
 const clubs = [
@@ -190,35 +191,46 @@ const clubs = [
 
 export default function ClubsPage() {
   const [activeClub, setActiveClub] = useState(null);
+  const navigate = useNavigate();
 
   return (
     <>
       <div
         className="
-        min-h-screen px-8 py-20 transition-colors
+        min-h-screen px-4 py-12 md:px-8  transition-colors
         bg-zinc-50 text-zinc-900
         dark:bg-zinc-950 dark:text-zinc-100
       "
       >
-        <h1 className="text-8xl font-semibold mb-25 text-center">Clubs</h1>
+        <motion.h1
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-5xl md:text-8xl font-semibold my-12 md:mb-25 text-center"
+        >
+          Clubs
+        </motion.h1>
 
         {/* Grid aligned like reference */}
-        <div className="w-full mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 md:px-10">
+        <div className="w-full mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10 md:px-10">
           {clubs.map((club, i) => (
             <motion.div
               key={i}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1, duration: 0.5 }}
               onClick={() => setActiveClub(club)}
               whileHover={{ y: -8, scale: 1.03 }}
-              transition={{ type: "spring", stiffness: 160, damping: 18 }}
+              layoutId={`club-${club.tag}`}
               className={`
-              relative rounded-3xl p-8 cursor-pointer
+              relative rounded-3xl p-6 md:p-8 cursor-pointer
               bg-gradient-to-br ${club.gradient}
               text-zinc-900
               shadow-md
               dark:shadow-none 
             `}
             >
-              <div className="relative z-10 flex  gap-10 justify-between h-48 ">
+              <div className="relative z-10 flex flex-col sm:flex-row gap-4 sm:gap-10 justify-between h-auto sm:h-48 ">
                 <div>
                   <club.icon />
                   <h2 className="text-2xl font-bold leading-tight">
@@ -230,8 +242,7 @@ export default function ClubsPage() {
                 <div className="flex items-center">
                   <div
                     className="
-                    text-md  h-1/2
-                  font-semibold
+                    text-md font-semibold
                   "
                   >
                     {club.description}
@@ -262,13 +273,13 @@ export default function ClubsPage() {
                 exit={{ y: 30, scale: 0.96 }}
                 transition={{ type: "spring", stiffness: 160, damping: 20 }}
                 className={`
-        w-full max-w-5xl overflow-hidden rounded-3xl
+        w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-3xl
         dark:bg-zinc-900 bg-gradient-to-r ${activeClub.gradient}
         shadow-2xl dark:text-black
       `}
               >
                 {/* Header */}
-                <div className={`relative px-10 py-8`}>
+                <div className={`relative px-6 py-6 md:px-10 md:py-8`}>
                   <button
                     onClick={() => setActiveClub(null)}
                     className="absolute right-6 top-6 rounded-full bg-white/20 p-2 hover:bg-white/30"
@@ -288,15 +299,13 @@ export default function ClubsPage() {
                 </div>
 
                 {/* Content */}
-                <div className="px-10 py-8 space-y-8">
+                <div className="px-6 py-6 md:px-10 md:py-8 space-y-8">
                   {/* About */}
                   <section>
                     <h3 className="text-xl font-semibold mb-2">
                       About the Club
                     </h3>
-                    <p className="leading-relaxed">
-                      {activeClub.description}
-                    </p>
+                    <p className="leading-relaxed">{activeClub.description}</p>
                   </section>
 
                   {/* Activities + Benefits */}
@@ -321,12 +330,13 @@ export default function ClubsPage() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex gap-4 pt-4">
+                  <div className="flex flex-col sm:flex-row gap-4 pt-4">
                     <button
                       className="
               rounded-xl px-6 py-3 font-medium
               bg-blue-600 hover:bg-blue-500 text-white transition
             "
+                      onClick={() => navigate("/contact")}
                     >
                       Join This Club
                     </button>

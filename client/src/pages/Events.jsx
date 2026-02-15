@@ -1,42 +1,32 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useState } from "react";
+import { useLoaderData } from "react-router-dom";
+import { motion } from "framer-motion";
 import EventDetailModal from "../components/EventDetailModal";
 import Footer from "../components/Footer";
+import { api } from "../api/axios.js";
+
+export const eventsLoader = async () => {
+  try {
+    const res = await api.get("/events", {
+      timeout: 8000,
+    });
+
+    if (Array.isArray(res.data)) {
+      return res.data;
+    } else if (Array.isArray(res.data?.events)) {
+      return res.data.events;
+    } else {
+      return [];
+    }
+  } catch (err) {
+    console.error("API failed:", err);
+    throw new Response("Unable to load events right now.", { status: 500 });
+  }
+};
 
 const Events = () => {
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const events = useLoaderData();
   const [selectedEvent, setSelectedEvent] = useState(null);
-
-  useEffect(() => {
-    const fetchEvents = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const res = await axios.get("http://localhost:3000/api/events", {
-          timeout: 8000,
-        });
-
-        if (Array.isArray(res.data)) {
-          setEvents(res.data);
-        } else if (Array.isArray(res.data?.events)) {
-          setEvents(res.data.events);
-        } else {
-          setEvents([]);
-        }
-      } catch (err) {
-        console.error("API failed:", err);
-        setError("Unable to load events right now.");
-        setEvents([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchEvents();
-  }, []);
 
   const now = new Date();
 
@@ -44,24 +34,26 @@ const Events = () => {
 
   const pastEvents = events.filter((e) => new Date(e.date) < now);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center dark:bg-gray-900">
-        <p className="text-gray-500 dark:text-gray-300">Loading events...</p>
-      </div>
-    );
-  }
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 },
+  };
 
   return (
     <>
       <div className="min-h-screen pt-30">
         <div className="w-full mx-auto space-y-14 md:px-30">
           {/* ERROR */}
-          {error && (
-            <div className="bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 p-4 rounded-lg">
-              {error}
-            </div>
-          )}
 
           {/* UPCOMING EVENTS */}
           <section>
@@ -74,13 +66,20 @@ const Events = () => {
                 No upcoming events.
               </p>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <motion.div
+                variants={container}
+                initial="hidden"
+                animate="show"
+                className="grid grid-cols-1 md:grid-cols-3 gap-6"
+              >
                 {upcomingEvents.map((event) => (
-                  <div
+                  <motion.div
                     key={event._id}
+                    variants={item}
+                    whileHover={{ scale: 1.02 }}
                     onClick={() => setSelectedEvent(event)}
                     className="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden
-  cursor-pointer hover:scale-[1.02] transition"
+  cursor-pointer transition"
                   >
                     {/* ✅ EVENT IMAGE (FIRST IMAGE ONLY) */}
                     {event.images?.length > 0 ? (
@@ -103,9 +102,9 @@ const Events = () => {
                         {new Date(event.date).toDateString()}
                       </p>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             )}
           </section>
 
@@ -120,10 +119,17 @@ const Events = () => {
                 No past events.
               </p>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <motion.div
+                variants={container}
+                initial="hidden"
+                animate="show"
+                className="grid grid-cols-1 md:grid-cols-3 gap-6"
+              >
                 {pastEvents.map((event) => (
-                  <div
+                  <motion.div
                     key={event._id}
+                    variants={item}
+                    whileHover={{ scale: 1.02 }}
                     onClick={() => setSelectedEvent(event)}
                     className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 space-y-4
   cursor-pointer hover:shadow-lg transition"
@@ -149,9 +155,9 @@ const Events = () => {
                         No Image
                       </div>
                     )}
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             )}
             {selectedEvent && (
               <EventDetailModal

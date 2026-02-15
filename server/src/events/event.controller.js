@@ -1,25 +1,7 @@
 import Event from "./event.model.js";
 import { uploadBuffer } from "./uploadToImageKit.js";
 import imagekit from "../config/imagekit.js";
-
-// Function to validate YouTube URL (including Shorts)
-const isValidYoutubeUrl = (url) => {
-  // Handle regular YouTube URLs
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-  const match = url.match(regExp);
-  if (match && match[2].length === 11) {
-    return true;
-  }
-
-  // Handle YouTube Shorts URLs
-  const shortsRegExp = /\/shorts\/([^#&?/]*)/;
-  const shortsMatch = url.match(shortsRegExp);
-  if (shortsMatch && shortsMatch[1] && shortsMatch[1].length === 11) {
-    return true;
-  }
-
-  return false;
-};
+import { isValidYoutubeUrl } from "../utils/youtube.js";
 
 // CREATE EVENT
 export const createEvent = async (req, res) => {

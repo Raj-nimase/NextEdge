@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import { api } from "../api/axios.js";
 import AdminEventForm from "./AdminEventForm";
 import AdminEventTable from "./AdminEventTable";
 import AdminEventEditModal from "./AdminEventEditModal";
@@ -9,7 +9,7 @@ const AdminEventsPage = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
 
   const fetchEvents = async () => {
-    const res = await axios.get("http://localhost:3000/api/events");
+    const res = await api.get("/events");
     setEvents(res.data.events || []);
   };
 

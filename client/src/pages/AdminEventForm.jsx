@@ -1,7 +1,8 @@
 import { useState } from "react";
-import axios from "axios";
+import { api } from "../api/axios.js";
+import { isValidYoutubeUrl } from "../utils/youtube.js";
 
-const AdminEventForm = () => {
+const AdminEventForm = ({ onSuccess }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
@@ -32,7 +33,7 @@ const AdminEventForm = () => {
     images.forEach((img) => formData.append("images", img));
 
     try {
-      await axios.post("http://localhost:3000/api/events", formData);
+      await api.post("/events", formData);
       alert("Event created successfully!");
       setTitle("");
       setDescription("");
@@ -40,30 +41,15 @@ const AdminEventForm = () => {
       setLocation("");
       setYoutubeVideoUrl("");
       setImages([]);
+
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (err) {
       alert("Upload failed", err);
     } finally {
       setLoading(false);
     }
-  };
-
-  const isValidYoutubeUrl = (url) => {
-    // Handle regular YouTube URLs
-    const regExp =
-      /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
-    if (match && match[2].length === 11) {
-      return true;
-    }
-
-    // Handle YouTube Shorts URLs
-    const shortsRegExp = /\/shorts\/([^#&?/]*)/;
-    const shortsMatch = url.match(shortsRegExp);
-    if (shortsMatch && shortsMatch[1] && shortsMatch[1].length === 11) {
-      return true;
-    }
-
-    return false;
   };
 
   return (

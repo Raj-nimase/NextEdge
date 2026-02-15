@@ -1,52 +1,66 @@
+import {
+  createBrowserRouter,
+  RouterProvider,
+  createRoutesFromElements,
+  Route,
+  Outlet,
+} from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import ClubePage from "./pages/ClubePage";
 import About from "./pages/About";
-import Gallery from "./pages/Gallery";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Gallery, { galleryLoader } from "./pages/Gallery";
 import Contact from "./pages/Contact";
-import Events from "./pages/Events";
+import Events, { eventsLoader } from "./pages/Events";
 import AdminEventsPage from "./pages/AdminEventsPage";
 import AdminContactPage from "./pages/AdminContactPage";
 import AdminLogin from "./pages/AdminLogin";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 
-function App() {
+const Layout = () => {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/clubs" element={<ClubePage />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/gallery" element={<Gallery />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/events" element={<Events />} />
-
-          {/* Admin Routes */}
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route
-            path="/admin/event-form"
-            element={
-              <ProtectedRoute>
-                <AdminEventsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/contacts"
-            element={
-              <ProtectedRoute>
-                <AdminContactPage />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </AuthProvider>
-    </BrowserRouter>
+    <AuthProvider>
+      <Navbar />
+      <Outlet />
+    </AuthProvider>
   );
+};
+
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route element={<Layout />}>
+      <Route path="/" element={<Home />} />
+      <Route path="/clubs" element={<ClubePage />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/gallery" element={<Gallery />} loader={galleryLoader} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/events" element={<Events />} loader={eventsLoader} />
+
+      {/* Admin Routes */}
+      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route
+        path="/admin/event-form"
+        element={
+          <ProtectedRoute>
+            <AdminEventsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/contacts"
+        element={
+          <ProtectedRoute>
+            <AdminContactPage />
+          </ProtectedRoute>
+        }
+      />
+    </Route>,
+  ),
+);
+
+function App() {
+  return <RouterProvider router={router} />;
 }
 
 export default App;

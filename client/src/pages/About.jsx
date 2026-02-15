@@ -111,7 +111,7 @@ export default function About() {
 
           <div className="container mx-auto px-6 lg:px-12">
             <FadeIn>
-              <h1 className="text-5xl md:text-8xl tracking-tight leading-[0.9] mb-16 font-next3">
+              <h1 className="text-5xl md:text-8xl lg:tracking-tight lg:leading-[0.9] mb-16 font-bold lg:font-next3">
                 About <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-blue-600 to-blue-500">
                   Next Edge Society

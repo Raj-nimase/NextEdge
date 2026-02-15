@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { Mail, Phone, MapPin, Clock } from 'lucide-react';
-import axios from 'axios';
-import Footer from '../components/Footer';
+import React, { useState } from "react";
+import { Mail, Phone, MapPin, Clock } from "lucide-react";
+import axios from "axios";
+import { motion, AnimatePresence } from "framer-motion";
+import Footer from "../components/Footer";
 
 // --- Data Definitions ---
 
@@ -18,21 +19,48 @@ const OFFICE_HOURS = [
 ];
 
 const CLUB_INTERESTS = [
-  "CodeForge Tech", "LaunchLab Entrepreneurship", "ReadApp Communication",
-  "ImpactStore Social Welfare", "SkillQuest Life Skills", "Craftory Art & Craft",
+  "CodeForge Tech",
+  "LaunchLab Entrepreneurship",
+  "ReadApp Communication",
+  "ImpactStore Social Welfare",
+  "SkillQuest Life Skills",
+  "Craftory Art & Craft",
 ];
 
-const YEAR_OPTIONS = ["Select your year", "First Year", "Second Year", "Third Year", "Fourth Year", "Graduate"];
-const INTEREST_AREAS = ["Select Area of Interest", "Event Management", "Marketing & Outreach", "Technical Support", "Content Creation"];
+const YEAR_OPTIONS = [
+  "Select your year",
+  "First Year",
+  "Second Year",
+  "Third Year",
+  "Fourth Year",
+  "Graduate",
+];
+const INTEREST_AREAS = [
+  "Select Area of Interest",
+  "Event Management",
+  "Marketing & Outreach",
+  "Technical Support",
+  "Content Creation",
+];
 
 // --- Reusable Form Components ---
 
 /**
  * Renders a standard text input field.
  */
-const InputField = ({ label, name, type = 'text', required = false, value, onChange }) => (
+const InputField = ({
+  label,
+  name,
+  type = "text",
+  required = false,
+  value,
+  onChange,
+}) => (
   <div className="flex-1 min-w-[45%]">
-    <label htmlFor={name} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+    <label
+      htmlFor={name}
+      className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+    >
       {label} {required && <span className="text-red-500">*</span>}
     </label>
     <input
@@ -50,9 +78,19 @@ const InputField = ({ label, name, type = 'text', required = false, value, onCha
 /**
  * Renders a dropdown select field.
  */
-const SelectField = ({ label, name, required = false, options, value, onChange }) => (
+const SelectField = ({
+  label,
+  name,
+  required = false,
+  options,
+  value,
+  onChange,
+}) => (
   <div className="flex-1 min-w-[45%]">
-    <label htmlFor={name} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+    <label
+      htmlFor={name}
+      className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+    >
       {label} {required && <span className="text-red-500">*</span>}
     </label>
     <select
@@ -72,22 +110,53 @@ const SelectField = ({ label, name, required = false, options, value, onChange }
   </div>
 );
 
-
 // --- Membership Form Component ---
 
 /**
  * Renders the Membership Application Form.
  */
-const MembershipForm = ({ formData, handleInputChange, handleCheckboxChange, handleSubmit, formMessage }) => {
-
+const MembershipForm = ({
+  formData,
+  handleInputChange,
+  handleCheckboxChange,
+  handleSubmit,
+  formMessage,
+}) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-6 p-6">
-      <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Join NextEdge Society</h3>
+      <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+        Join NextEdge Society
+      </h3>
       <div className="flex flex-wrap gap-4">
-        <InputField label="Name" name="name" required value={formData.name} onChange={handleInputChange} />
-        <InputField label="Email" name="email" type="email" required value={formData.email} onChange={handleInputChange} />
-        <InputField label="Phone" name="phone" value={formData.phone} onChange={handleInputChange} />
-        <SelectField label="Year of Study" name="year" required options={YEAR_OPTIONS} value={formData.year} onChange={handleInputChange} />
+        <InputField
+          label="Name"
+          name="name"
+          required
+          value={formData.name}
+          onChange={handleInputChange}
+        />
+        <InputField
+          label="Email"
+          name="email"
+          type="email"
+          required
+          value={formData.email}
+          onChange={handleInputChange}
+        />
+        <InputField
+          label="Phone"
+          name="phone"
+          value={formData.phone}
+          onChange={handleInputChange}
+        />
+        <SelectField
+          label="Year of Study"
+          name="year"
+          required
+          options={YEAR_OPTIONS}
+          value={formData.year}
+          onChange={handleInputChange}
+        />
       </div>
 
       <div>
@@ -106,7 +175,10 @@ const MembershipForm = ({ formData, handleInputChange, handleCheckboxChange, han
                 onChange={handleCheckboxChange}
                 className="h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 bg-white dark:bg-gray-700"
               />
-              <label htmlFor={interest} className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+              <label
+                htmlFor={interest}
+                className="ml-2 text-sm text-gray-700 dark:text-gray-300"
+              >
                 {interest}
               </label>
             </div>
@@ -115,7 +187,10 @@ const MembershipForm = ({ formData, handleInputChange, handleCheckboxChange, han
       </div>
 
       <div>
-        <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label
+          htmlFor="message"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+        >
           Message
         </label>
         <textarea
@@ -128,12 +203,14 @@ const MembershipForm = ({ formData, handleInputChange, handleCheckboxChange, han
           className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400"
         ></textarea>
       </div>
-      
+
       {formMessage && (
-            <p className={`mt-2 text-sm ${formMessage.includes('submitted') ? 'text-green-600' : 'text-red-500'}`}>
-                {formMessage}
-            </p>
-        )}
+        <p
+          className={`mt-2 text-sm ${formMessage.includes("submitted") ? "text-green-600" : "text-red-500"}`}
+        >
+          {formMessage}
+        </p>
+      )}
 
       <button
         type="submit"
@@ -146,28 +223,68 @@ const MembershipForm = ({ formData, handleInputChange, handleCheckboxChange, han
   );
 };
 
-
 // --- Volunteer Form Component ---
 
 /**
  * Renders the Volunteer Form.
  */
-const VolunteerForm = ({ formData, handleInputChange, handleSubmit, formMessage }) => {
-
+const VolunteerForm = ({
+  formData,
+  handleInputChange,
+  handleSubmit,
+  formMessage,
+}) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-6 p-6">
-      <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Volunteer With Us</h3>
+      <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+        Volunteer With Us
+      </h3>
       <div className="flex flex-wrap gap-4">
-        <InputField label="Name" name="name" required value={formData.name} onChange={handleInputChange} />
-        <InputField label="Email" name="email" type="email" required value={formData.email} onChange={handleInputChange} />
-        <InputField label="Phone" name="phone" value={formData.phone} onChange={handleInputChange} />
-        <SelectField label="Year of Study" name="year" required options={YEAR_OPTIONS} value={formData.year} onChange={handleInputChange} />
+        <InputField
+          label="Name"
+          name="name"
+          required
+          value={formData.name}
+          onChange={handleInputChange}
+        />
+        <InputField
+          label="Email"
+          name="email"
+          type="email"
+          required
+          value={formData.email}
+          onChange={handleInputChange}
+        />
+        <InputField
+          label="Phone"
+          name="phone"
+          value={formData.phone}
+          onChange={handleInputChange}
+        />
+        <SelectField
+          label="Year of Study"
+          name="year"
+          required
+          options={YEAR_OPTIONS}
+          value={formData.year}
+          onChange={handleInputChange}
+        />
       </div>
 
-      <SelectField label="Area of Interest" name="interestArea" required options={INTEREST_AREAS} value={formData.interestArea} onChange={handleInputChange} />
+      <SelectField
+        label="Area of Interest"
+        name="interestArea"
+        required
+        options={INTEREST_AREAS}
+        value={formData.interestArea}
+        onChange={handleInputChange}
+      />
 
       <div>
-        <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label
+          htmlFor="message"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+        >
           Message
         </label>
         <textarea
@@ -182,8 +299,10 @@ const VolunteerForm = ({ formData, handleInputChange, handleSubmit, formMessage 
       </div>
 
       {formMessage && (
-        <p className={`mt-2 text-sm ${formMessage.includes('submitted') ? 'text-green-600' : 'text-red-500'}`}>
-            {formMessage}
+        <p
+          className={`mt-2 text-sm ${formMessage.includes("submitted") ? "text-green-600" : "text-red-500"}`}
+        >
+          {formMessage}
         </p>
       )}
 
@@ -198,23 +317,22 @@ const VolunteerForm = ({ formData, handleInputChange, handleSubmit, formMessage 
   );
 };
 
-
 // --- Main Contact Page Component ---
 
 /**
  * Main Contact Page Component
  */
 const Contact = () => {
-  const [activeTab, setActiveTab] = useState('membership');
-  const [formMessage, setFormMessage] = useState('');
-  
+  const [activeTab, setActiveTab] = useState("membership");
+  const [formMessage, setFormMessage] = useState("");
+
   // Common initial state for both forms
   const initialFormState = {
-    name: '',
-    email: '',
-    phone: '',
+    name: "",
+    email: "",
+    phone: "",
     year: YEAR_OPTIONS[0],
-    message: '',
+    message: "",
   };
 
   const [membershipForm, setMembershipForm] = useState({
@@ -227,112 +345,144 @@ const Contact = () => {
     interestArea: INTEREST_AREAS[0], // Specific to volunteer
   });
 
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    if (activeTab === 'membership') {
-      setMembershipForm(prev => ({ ...prev, [name]: value }));
+    if (activeTab === "membership") {
+      setMembershipForm((prev) => ({ ...prev, [name]: value }));
     } else {
-      setVolunteerForm(prev => ({ ...prev, [name]: value }));
+      setVolunteerForm((prev) => ({ ...prev, [name]: value }));
     }
-    setFormMessage(''); // Clear message on input
+    setFormMessage(""); // Clear message on input
   };
 
   const handleCheckboxChange = (e) => {
     const { value, checked } = e.target;
-    setMembershipForm(prev => {
+    setMembershipForm((prev) => {
       const interests = checked
         ? [...prev.interests, value]
-        : prev.interests.filter(i => i !== value);
+        : prev.interests.filter((i) => i !== value);
       return { ...prev, interests };
     });
-    setFormMessage(''); // Clear message on input
+    setFormMessage(""); // Clear message on input
   };
-  
+
   const resetFormState = () => {
-    if (activeTab === 'membership') {
-        setMembershipForm({ ...initialFormState, interests: [] });
+    if (activeTab === "membership") {
+      setMembershipForm({ ...initialFormState, interests: [] });
     } else {
-        setVolunteerForm({ ...initialFormState, interestArea: INTEREST_AREAS[0] });
+      setVolunteerForm({
+        ...initialFormState,
+        interestArea: INTEREST_AREAS[0],
+      });
     }
-  }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = activeTab === 'membership' ? membershipForm : volunteerForm;
-    
+    const formData =
+      activeTab === "membership" ? membershipForm : volunteerForm;
+
     // Simple client-side validation check
-    if (!formData.name || !formData.email || formData.year === YEAR_OPTIONS[0]) {
-        setFormMessage("Please fill in all required fields.");
-        return;
+    if (
+      !formData.name ||
+      !formData.email ||
+      formData.year === YEAR_OPTIONS[0]
+    ) {
+      setFormMessage("Please fill in all required fields.");
+      return;
     }
 
     // Additional validation for membership form
-    if (activeTab === 'membership' && formData.interests.length === 0) {
-        setFormMessage("Please select at least one club interest.");
-        return;
+    if (activeTab === "membership" && formData.interests.length === 0) {
+      setFormMessage("Please select at least one club interest.");
+      return;
     }
 
     // Additional validation for volunteer form
-    if (activeTab === 'volunteer' && formData.interestArea === INTEREST_AREAS[0]) {
-        setFormMessage("Please select an area of interest.");
-        return;
+    if (
+      activeTab === "volunteer" &&
+      formData.interestArea === INTEREST_AREAS[0]
+    ) {
+      setFormMessage("Please select an area of interest.");
+      return;
     }
 
     try {
-        const endpoint = activeTab === 'membership' 
-            ? 'http://localhost:3000/api/contacts/membership'
-            : 'http://localhost:3000/api/contacts/volunteer';
-        
-        const response = await axios.post(endpoint, formData);
-        
-        if (response.data.success) {
-            setFormMessage('Request submitted successfully!');
-            resetFormState();
-            setTimeout(() => setFormMessage(''), 5000);
-        }
+      const endpoint =
+        activeTab === "membership"
+          ? "http://localhost:3000/api/contacts/membership"
+          : "http://localhost:3000/api/contacts/volunteer";
+
+      const response = await axios.post(endpoint, formData);
+
+      if (response.data.success) {
+        setFormMessage("Request submitted successfully!");
+        resetFormState();
+        setTimeout(() => setFormMessage(""), 5000);
+      }
     } catch (error) {
-        console.error('Error submitting form:', error);
-        setFormMessage(
-            error.response?.data?.message || 
-            'Failed to submit request. Please try again later.'
-        );
-        setTimeout(() => setFormMessage(''), 5000);
+      console.error("Error submitting form:", error);
+      setFormMessage(
+        error.response?.data?.message ||
+          "Failed to submit request. Please try again later.",
+      );
+      setTimeout(() => setFormMessage(""), 5000);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300 font-sans">
-      
+    <div className="min-h-screen transition-colors duration-300 ">
       {/* Header/Banner Section */}
-      <header className="py-20 bg-blue-700 dark:bg-gray-800 text-white shadow-lg">
+      <motion.header
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="py-20 lg:pt-30 shadow-lg"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-5xl font-extrabold mb-3 tracking-tight">Contact Us</h1>
-          <p className="text-xl font-light">
-            Get in touch with the NextEdge Society team. We'd love to hear from you!
-          </p>
+          <motion.h1
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-5xl lg:text-6xl  mb-3 tracking-tight font-semibold"
+          >
+            Contact Us
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="lg:text-xl font-light"
+          >
+            Get in touch with the NextEdge Society team. We'd love to hear from
+            you!
+          </motion.p>
         </div>
-      </header>
+      </motion.header>
 
       {/* Main Content: Contact Info and Forms */}
-      <main className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-
           {/* LEFT COLUMN: Contact Information & Office Hours */}
           <div className="space-y-8 lg:col-span-1">
-            
             {/* Contact Information Card */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700"
+            >
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 border-b pb-2 border-gray-100 dark:border-gray-700">
                 Contact Information
               </h2>
               <div className="space-y-4">
-                
                 {/* Location */}
                 <div className="flex items-start text-gray-600 dark:text-gray-300">
                   <MapPin className="w-6 h-6 text-blue-500 mr-3 mt-1 flex-shrink-0" />
                   <div>
-                    <p className="font-semibold text-gray-900 dark:text-white">Location</p>
+                    <p className="font-semibold text-gray-900 dark:text-white">
+                      Location
+                    </p>
                     <p className="text-sm">{CONTACT_INFO.location}</p>
                   </div>
                 </div>
@@ -341,8 +491,15 @@ const Contact = () => {
                 <div className="flex items-start text-gray-600 dark:text-gray-300">
                   <Mail className="w-6 h-6 text-blue-500 mr-3 mt-1 flex-shrink-0" />
                   <div>
-                    <p className="font-semibold text-gray-900 dark:text-white">Email</p>
-                    <a href={`mailto:${CONTACT_INFO.email}`} className="text-sm hover:text-blue-500 transition-colors">{CONTACT_INFO.email}</a>
+                    <p className="font-semibold text-gray-900 dark:text-white">
+                      Email
+                    </p>
+                    <a
+                      href={`mailto:${CONTACT_INFO.email}`}
+                      className="text-sm hover:text-blue-500 transition-colors"
+                    >
+                      {CONTACT_INFO.email}
+                    </a>
                   </div>
                 </div>
 
@@ -350,56 +507,77 @@ const Contact = () => {
                 <div className="flex items-start text-gray-600 dark:text-gray-300">
                   <Phone className="w-6 h-6 text-blue-500 mr-3 mt-1 flex-shrink-0" />
                   <div>
-                    <p className="font-semibold text-gray-900 dark:text-white">Phone</p>
+                    <p className="font-semibold text-gray-900 dark:text-white">
+                      Phone
+                    </p>
                     <p className="text-sm">{CONTACT_INFO.phone}</p>
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Office Hours Card */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700"
+            >
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 border-b pb-2 border-gray-100 dark:border-gray-700">
                 Office Hours
               </h2>
               <div className="space-y-3">
                 {OFFICE_HOURS.map((item, index) => (
-                  <div key={index} className="flex justify-between items-center text-gray-600 dark:text-gray-300">
+                  <div
+                    key={index}
+                    className="flex justify-between items-center text-gray-600 dark:text-gray-300"
+                  >
                     <div className="flex items-center">
-                       <Clock className="w-5 h-5 text-blue-500 mr-2" />
-                      <p className="font-medium text-gray-900 dark:text-white">{item.day}</p>
+                      <Clock className="w-5 h-5 text-blue-500 mr-2" />
+                      <p className="font-medium text-gray-900 dark:text-white">
+                        {item.day}
+                      </p>
                     </div>
-                    <span className={item.closed ? "text-red-500 font-semibold" : "text-gray-700 dark:text-gray-300"}>
+                    <span
+                      className={
+                        item.closed
+                          ? "text-red-500 font-semibold"
+                          : "text-gray-700 dark:text-gray-300"
+                      }
+                    >
                       {item.hours}
                     </span>
                   </div>
                 ))}
               </div>
-            </div>
-
+            </motion.div>
           </div>
 
           {/* RIGHT COLUMN: Tabbed Forms */}
-          <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700">
-            
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700"
+          >
             {/* Tabs Navigation */}
             <div className="flex border-b border-gray-200 dark:border-gray-700">
               <button
-                onClick={() => setActiveTab('membership')}
+                onClick={() => setActiveTab("membership")}
                 className={`py-3 px-6 text-lg font-medium rounded-tl-xl transition-colors duration-150 ${
-                  activeTab === 'membership'
-                    ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-gray-50 dark:bg-gray-700'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400'
+                  activeTab === "membership"
+                    ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-gray-50 dark:bg-gray-700"
+                    : "text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
                 }`}
               >
                 Membership
               </button>
               <button
-                onClick={() => setActiveTab('volunteer')}
+                onClick={() => setActiveTab("volunteer")}
                 className={`py-3 px-6 text-lg font-medium transition-colors duration-150 ${
-                  activeTab === 'volunteer'
-                    ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-gray-50 dark:bg-gray-700'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400'
+                  activeTab === "volunteer"
+                    ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-gray-50 dark:bg-gray-700"
+                    : "text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
                 }`}
               >
                 Volunteer
@@ -407,32 +585,48 @@ const Contact = () => {
             </div>
 
             {/* Form Content */}
-            <div>
-              {activeTab === 'membership' ? (
-                <MembershipForm
-                  formData={membershipForm}
-                  handleInputChange={handleInputChange}
-                  handleCheckboxChange={handleCheckboxChange}
-                  handleSubmit={handleSubmit}
-                  formMessage={formMessage}
-                />
-              ) : (
-                <VolunteerForm
-                  formData={volunteerForm}
-                  handleInputChange={handleInputChange}
-                  handleSubmit={handleSubmit}
-                  formMessage={formMessage}
-                />
-              )}
+            <div className="overflow-hidden">
+              <AnimatePresence mode="wait">
+                {activeTab === "membership" ? (
+                  <motion.div
+                    key="membership"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <MembershipForm
+                      formData={membershipForm}
+                      handleInputChange={handleInputChange}
+                      handleCheckboxChange={handleCheckboxChange}
+                      handleSubmit={handleSubmit}
+                      formMessage={formMessage}
+                    />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="volunteer"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <VolunteerForm
+                      formData={volunteerForm}
+                      handleInputChange={handleInputChange}
+                      handleSubmit={handleSubmit}
+                      formMessage={formMessage}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-          </div>
-
+          </motion.div>
         </div>
       </main>
 
       {/* Simple Footer */}
-     <Footer/>
-
+      <Footer />
     </div>
   );
 };

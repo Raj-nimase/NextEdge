@@ -53,7 +53,7 @@ const createAdmin = async () => {
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     console.log("Username:", admin.username);
     console.log("Email:", admin.email);
-    console.log("Password:", password, "(use this to login)");
+    console.log("⚠️ Remember the password you entered; it will not be shown again.");
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
     process.exit(0);
