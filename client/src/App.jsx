@@ -9,9 +9,9 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import ClubePage from "./pages/ClubePage";
 import About from "./pages/About";
-import Gallery, { galleryLoader } from "./pages/Gallery";
+import Gallery from "./pages/Gallery";
 import Contact from "./pages/Contact";
-import Events, { eventsLoader } from "./pages/Events";
+import Events from "./pages/Events";
 import AdminEventsPage from "./pages/AdminEventsPage";
 import AdminContactPage from "./pages/AdminContactPage";
 import AdminLogin from "./pages/AdminLogin";
@@ -33,9 +33,9 @@ const router = createBrowserRouter(
       <Route path="/" element={<Home />} />
       <Route path="/clubs" element={<ClubePage />} />
       <Route path="/about" element={<About />} />
-      <Route path="/gallery" element={<Gallery />} loader={galleryLoader} />
+      <Route path="/gallery" element={<Gallery />} />
       <Route path="/contact" element={<Contact />} />
-      <Route path="/events" element={<Events />} loader={eventsLoader} />
+      <Route path="/events" element={<Events />} />
 
       {/* Admin Routes */}
       <Route path="/admin/login" element={<AdminLogin />} />

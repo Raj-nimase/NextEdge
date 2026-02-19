@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
-import { useLoaderData } from "react-router-dom";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { api } from "../api/axios";
+import { galleryCacheStore } from "../cache/eventsGalleryCache";
+import { getErrorMessage, logError } from "../utils/errorHandler";
 import Footer from "../components/Footer";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -9,28 +10,121 @@ import { AlertCircle, Camera, Loader2 } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export const galleryLoader = async () => {
-  try {
-    const response = await api.get("/events/gallery", { timeout: 10000 });
-    if (response.data.success && Array.isArray(response.data.images)) {
-      return response.data.images;
-    }
-    return [];
-  } catch (err) {
-    console.error("Gallery API Error:", err);
-    throw new Response(
-      err.response?.data?.message || "Unable to load gallery images.",
-      { status: 500 },
-    );
-  }
-};
+function GallerySkeleton() {
+  return (
+    <section className="w-full max-w-7xl mx-auto px-4 py-20">
+      <div className="relative mb-14">
+        <div className="h-12 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-3" />
+        <div className="h-5 w-full max-w-2xl bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        <div className="mt-5 h-[2px] w-24 bg-gray-200 dark:bg-gray-700 rounded-full" />
+      </div>
+      <div className="grid grid-cols-1 gap-6 md:flex md:flex-wrap md:gap-4">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <div
+            key={i}
+            className="rounded-xl overflow-hidden shadow-lg bg-gray-200 dark:bg-gray-700 animate-pulse aspect-[4/3] md:h-[260px] md:min-w-[200px] md:flex-1"
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function GalleryErrorBlock({ message, onRetry, isRetrying }) {
+  return (
+    <section className="w-full max-w-7xl mx-auto px-4 py-20">
+      <div className="flex flex-col items-center justify-center py-16">
+        <div className="max-w-lg w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl p-8 text-center space-y-4">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-red-50 dark:bg-red-900/20">
+            <AlertCircle className="w-8 h-8 text-red-500" />
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            We could not load the gallery
+          </h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{message}</p>
+          <button
+            type="button"
+            onClick={onRetry}
+            disabled={isRetrying}
+            className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-70 disabled:cursor-not-allowed transition-colors"
+          >
+            {isRetrying && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            Try again
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function Gallery() {
   const cardsRef = useRef([]);
   const [activeImage, setActiveImage] = useState(null);
-  const images = useLoaderData();
+  const [images, setImages] = useState(() => galleryCacheStore.get() ?? []);
+  const [loading, setLoading] = useState(() => galleryCacheStore.get() === null);
+  const [error, setError] = useState(null);
+  const [retrying, setRetrying] = useState(false);
 
-  /* Scroll animations for mobile cards */
+  const fetchGallery = useCallback(async (isRetry = false) => {
+    if (isRetry) setRetrying(true);
+    else setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await api.get("/events/gallery", { timeout: 10000 });
+      
+      // Validate response structure
+      if (!response || !response.data) {
+        throw new Error("Invalid response format from server");
+      }
+
+      // Handle successful response with images
+      if (response.data.success && Array.isArray(response.data.images)) {
+        const data = response.data.images;
+        
+        // Validate images array
+        if (!Array.isArray(data)) {
+          console.warn("Gallery images data is not an array:", data);
+          setImages([]);
+          return;
+        }
+
+        setImages(data);
+        // Only cache non-empty results
+        if (data.length > 0) {
+          galleryCacheStore.set(data);
+        }
+      } 
+      // Handle API error response (success: false)
+      else if (response.data.success === false) {
+        throw new Error(response.data.message || "Failed to fetch gallery images");
+      }
+      // Handle unexpected response format
+      else {
+        console.warn("Unexpected gallery response format:", response.data);
+        setImages([]);
+      }
+    } catch (err) {
+      logError("Gallery Fetch", err);
+      const errorMessage = getErrorMessage(err, "Unable to load gallery images.");
+      setError(errorMessage);
+      
+      // Don't clear cache on error - keep showing last successful data if available
+      // Only clear cache if this was a retry and we want fresh data
+      if (isRetry && images.length === 0) {
+        galleryCacheStore.set(null);
+      }
+    } finally {
+      setLoading(false);
+      setRetrying(false);
+    }
+  }, [images.length]);
+
+  useEffect(() => {
+    if (galleryCacheStore.get() !== null) return;
+    fetchGallery();
+  }, [fetchGallery]);
+
   useEffect(() => {
     if (images.length === 0) return;
 
@@ -49,22 +143,61 @@ export default function Gallery() {
             trigger: card,
             start: "top 85%",
           },
-        },
+        }
       );
     });
   }, [images]);
 
-  // Handle image load error
   const handleImageError = (e) => {
     e.target.src =
       "https://via.placeholder.com/800x600/e5e7eb/6b7280?text=Image+Not+Available";
   };
 
+  if (loading) {
+    return (
+      <>
+        <GallerySkeleton />
+        <Footer />
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <section className="w-full max-w-7xl mx-auto px-4 py-20">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="relative mb-14"
+          >
+            <span className="absolute -top-6 left-0 text-6xl font-bold text-blue-500/10 select-none">
+              Gallery
+            </span>
+            <h1 className="relative text-3xl md:text-5xl font-bold dark:text-white">
+              Media Gallery
+            </h1>
+            <p className="mt-3 max-w-2xl text-base md:text-lg text-gray-600 dark:text-gray-400">
+              A visual archive of moments from events, workshops, and
+              community-driven experiences that define our journey.
+            </p>
+            <div className="mt-5 h-[2px] w-24 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" />
+          </motion.div>
+        </section>
+        <GalleryErrorBlock
+          message={error}
+          onRetry={() => fetchGallery(true)}
+          isRetrying={retrying}
+        />
+        <Footer />
+      </>
+    );
+  }
+
   return (
     <>
-      {/* ===== SECTION ===== */}
       <section className="w-full max-w-7xl mx-auto px-4 py-20">
-        {/* ===== HEADER ===== */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -87,7 +220,6 @@ export default function Gallery() {
           <div className="mt-5 h-[2px] w-24 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" />
         </motion.div>
 
-        {/* ===== EMPTY STATE (NO IMAGES) ===== */}
         {images.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <Camera className="w-20 h-20 text-gray-300 dark:text-gray-600 mb-4" />
@@ -101,7 +233,6 @@ export default function Gallery() {
           </div>
         )}
 
-        {/* ===== MOBILE VIEW ===== */}
         {images.length > 0 && (
           <motion.div
             initial="hidden"
@@ -148,7 +279,6 @@ export default function Gallery() {
           </motion.div>
         )}
 
-        {/* ===== DESKTOP VIEW ===== */}
         {images.length > 0 && (
           <motion.div
             initial="hidden"
@@ -170,9 +300,7 @@ export default function Gallery() {
                   show: { opacity: 1, scale: 1 },
                 }}
                 whileHover={{ scale: 1.05 }}
-                onClick={() => {
-                  setActiveImage(item);
-                }}
+                onClick={() => setActiveImage(item)}
                 className="
                   group cursor-pointer
                   relative flex-1 h-[260px] min-w-[200px]
@@ -210,7 +338,6 @@ export default function Gallery() {
         )}
       </section>
 
-      {/* ===== FULLSCREEN IMAGE OVERLAY ===== */}
       <AnimatePresence>
         {activeImage && (
           <motion.div
@@ -242,7 +369,6 @@ export default function Gallery() {
         items-center
       "
             >
-              {/* LEFT: Event Details */}
               <div className="w-full md:w-[30%] text-white space-y-4">
                 <h3 className="text-2xl font-bold leading-tight">
                   {activeImage.eventTitle}
@@ -258,7 +384,7 @@ export default function Gallery() {
                           year: "numeric",
                           month: "long",
                           day: "numeric",
-                        },
+                        }
                       )}
                     </span>
                   </div>
@@ -274,7 +400,6 @@ export default function Gallery() {
                 </p>
               </div>
 
-              {/* RIGHT: Image */}
               <div className="w-full md:w-[70%] flex justify-center">
                 <img
                   src={activeImage.url}
