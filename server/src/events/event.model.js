@@ -12,7 +12,8 @@ const eventSchema = new mongoose.Schema(
     date: { type: Date, required: true },
     location: { type: String },
 
-    images: [mediaSchema],
+    coverImage: mediaSchema, // Single cover image (set at creation)
+    images: [mediaSchema], // Gallery images (added after event passes)
     youtubeVideoUrl: { type: String },
 
     createdBy: {
@@ -20,7 +21,7 @@ const eventSchema = new mongoose.Schema(
       ref: "Admin",
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.model("Event", eventSchema);

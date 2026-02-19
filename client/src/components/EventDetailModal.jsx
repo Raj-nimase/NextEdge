@@ -1,6 +1,6 @@
 import { getYoutubeVideoId } from "../utils/youtube.js";
 
-const EventDetailModal = ({ event, onClose }) => {
+const EventDetailModal = ({ event, isPast, onClose }) => {
   if (!event) return null;
 
   return (
@@ -33,8 +33,8 @@ const EventDetailModal = ({ event, onClose }) => {
             </p>
           )}
 
-          {/* IMAGE GALLERY */}
-          {event.images?.length > 0 && (
+          {/* IMAGE GALLERY — shown only for past events */}
+          {isPast && event.images?.length > 0 && (
             <div>
               <h3 className="font-semibold text-lg mb-3 text-gray-800 dark:text-gray-100">
                 Event Photos
@@ -61,7 +61,7 @@ const EventDetailModal = ({ event, onClose }) => {
               <div className="aspect-w-16 aspect-h-9 w-full">
                 <iframe
                   src={`https://www.youtube.com/embed/${getYoutubeVideoId(
-                    event.youtubeVideoUrl
+                    event.youtubeVideoUrl,
                   )}?autoplay=1&mute=1&controls=0&rel=0&modestbranding=1&playsinline=1`}
                   title="Event Video"
                   className="w-full h-64 md:h-96 rounded-lg"

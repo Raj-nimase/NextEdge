@@ -6,30 +6,21 @@ import { isValidYoutubeUrl } from "../utils/youtube.js";
 // CREATE EVENT
 export const createEvent = async (req, res) => {
   try {
-    const images = [];
+    let coverImage = undefined;
 
-    if (req.files?.images) {
-      console.log(
-        "Processing",
-        req.files.images.length,
-        "images for new event"
-      );
-      for (const file of req.files.images) {
-        const fileName = `event_image_${Date.now()}_${Math.floor(
-          Math.random() * 1000
-        )}`;
-        console.log("Uploading image:", fileName);
-        const result = await uploadBuffer(
-          file.buffer,
-          "events/images",
-          fileName
-        );
-        console.log("Upload result:", result);
-        images.push({
-          url: result.url,
-          publicId: result.fileId,
-        });
-      }
+    // Handle single cover image upload
+    if (req.files?.coverImage && req.files.coverImage.length > 0) {
+      const file = req.files.coverImage[0];
+      const fileName = `event_cover_${Date.now()}_${Math.floor(
+        Math.random() * 1000,
+      )}`;
+      console.log("Uploading cover image:", fileName);
+      const result = await uploadBuffer(file.buffer, "events/covers", fileName);
+      console.log("Cover upload result:", result);
+      coverImage = {
+        url: result.url,
+        publicId: result.fileId,
+      };
     }
 
     // Validate YouTube URL if provided
@@ -42,13 +33,26 @@ export const createEvent = async (req, res) => {
         .json({ success: false, message: "Invalid YouTube URL" });
     }
 
-    const event = await Event.create({
-      ...req.body,
-      images,
-    });
+    // Build event data explicitly (avoid spreading req.body which may contain extra fields)
+    const eventData = {
+      title: req.body.title,
+      description: req.body.description,
+      date: req.body.date,
+      location: req.body.location,
+      youtubeVideoUrl: req.body.youtubeVideoUrl || undefined,
+      images: [],
+    };
+
+    // Only attach coverImage if one was uploaded
+    if (coverImage) {
+      eventData.coverImage = coverImage;
+    }
+
+    const event = await Event.create(eventData);
 
     res.status(201).json({ success: true, event });
   } catch (error) {
+    console.error("CREATE EVENT ERROR:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -91,15 +95,24 @@ export const deleteEvent = async (req, res) => {
 
   if (!event) return res.status(404).json({ message: "Event not found" });
 
+  // Delete cover image
+  if (event.coverImage?.publicId) {
+    try {
+      await imagekit.deleteFile(event.coverImage.publicId);
+    } catch (deleteError) {
+      console.error("Error deleting cover image from ImageKit:", deleteError);
+    }
+  }
+
+  // Delete gallery images
   for (const img of event.images) {
     try {
       await imagekit.deleteFile(img.publicId);
     } catch (deleteError) {
       console.error(
         "Error deleting image from ImageKit during event deletion:",
-        deleteError
+        deleteError,
       );
-      // Continue with other deletions even if one fails
     }
   }
 
@@ -127,7 +140,7 @@ export const updateEvent = async (req, res) => {
         location: req.body.location,
         youtubeVideoUrl: youtubeVideoUrl,
       },
-      { new: true }
+      { new: true },
     );
 
     if (!event) {
@@ -153,13 +166,13 @@ export const addEventMedia = async (req, res) => {
       console.log("Processing", req.files.images.length, "images");
       for (const file of req.files.images) {
         const fileName = `event_image_${Date.now()}_${Math.floor(
-          Math.random() * 1000
+          Math.random() * 1000,
         )}`;
         console.log("Uploading image:", fileName);
         const result = await uploadBuffer(
           file.buffer,
           "events/images",
-          fileName
+          fileName,
         );
         console.log("Upload result:", result);
         event.images.push({
@@ -190,7 +203,7 @@ export const deleteEventMedia = async (req, res) => {
 
     // Check if image
     const imageIndex = event.images.findIndex(
-      (img) => img.publicId === publicId
+      (img) => img.publicId === publicId,
     );
 
     if (imageIndex !== -1) {
@@ -224,7 +237,8 @@ export const deleteEventMedia = async (req, res) => {
 // GET ALL EVENT IMAGES FOR GALLERY
 export const getAllEventImages = async (req, res) => {
   try {
-    const events = await Event.find()
+    const now = new Date();
+    const events = await Event.find({ date: { $lt: now } })
       .select("title description date location images")
       .sort({ date: -1 }); // Most recent first
 

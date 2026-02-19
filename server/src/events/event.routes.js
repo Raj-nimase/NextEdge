@@ -20,8 +20,8 @@ const router = express.Router();
 router.post(
   "/",
   authenticateAdmin,
-  upload.fields([{ name: "images", maxCount: 10 }]),
-  createEvent
+  upload.fields([{ name: "coverImage", maxCount: 1 }]),
+  createEvent,
 );
 
 // update event details
@@ -32,7 +32,7 @@ router.patch(
   "/:id/media",
   authenticateAdmin,
   upload.fields([{ name: "images", maxCount: 10 }]),
-  addEventMedia
+  addEventMedia,
 );
 // delete single media
 router.delete("/:id/media/:publicId", authenticateAdmin, deleteEventMedia);

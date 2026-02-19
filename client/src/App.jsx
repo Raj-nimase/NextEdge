@@ -12,6 +12,7 @@ import About from "./pages/About";
 import Gallery from "./pages/Gallery";
 import Contact from "./pages/Contact";
 import Events from "./pages/Events";
+import NotFound from "./pages/NotFound";
 import AdminEventsPage from "./pages/AdminEventsPage";
 import AdminContactPage from "./pages/AdminContactPage";
 import AdminLogin from "./pages/AdminLogin";
@@ -55,6 +56,9 @@ const router = createBrowserRouter(
           </ProtectedRoute>
         }
       />
+
+      {/* 404 Catch-all route - must be last */}
+      <Route path="*" element={<NotFound />} />
     </Route>,
   ),
 );

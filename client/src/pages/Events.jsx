@@ -79,54 +79,61 @@ const Events = () => {
   const [error, setError] = useState(null);
   const [retrying, setRetrying] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [selectedEventIsPast, setSelectedEventIsPast] = useState(false);
 
-  const fetchEvents = useCallback(async (isRetry = false) => {
-    if (isRetry) setRetrying(true);
-    else setLoading(true);
-    setError(null);
-    
-    try {
-      const res = await api.get("/events", { timeout: 8000 });
-      
-      // Validate response structure
-      if (!res || !res.data) {
-        throw new Error("Invalid response format from server");
-      }
+  const fetchEvents = useCallback(
+    async (isRetry = false) => {
+      if (isRetry) setRetrying(true);
+      else setLoading(true);
+      setError(null);
 
-      // Extract events array from response
-      let data = [];
-      if (Array.isArray(res.data)) {
-        data = res.data;
-      } else if (Array.isArray(res.data?.events)) {
-        data = res.data.events;
-      } else if (res.data?.success === false) {
-        // Handle API error response
-        throw new Error(res.data.message || "Failed to fetch events");
-      }
+      try {
+        const res = await api.get("/events", { timeout: 8000 });
 
-      // Validate data is an array before setting
-      if (!Array.isArray(data)) {
-        console.warn("Events data is not an array:", data);
-        data = [];
-      }
+        // Validate response structure
+        if (!res || !res.data) {
+          throw new Error("Invalid response format from server");
+        }
 
-      setEvents(data);
-      eventsCacheStore.set(data);
-    } catch (err) {
-      logError("Events Fetch", err);
-      const errorMessage = getErrorMessage(err, "Unable to load events right now.");
-      setError(errorMessage);
-      
-      // Don't clear cache on error - keep showing last successful data if available
-      // Only clear cache if this was a retry and we want fresh data
-      if (isRetry && events.length === 0) {
-        eventsCacheStore.set(null);
+        // Extract events array from response
+        let data = [];
+        if (Array.isArray(res.data)) {
+          data = res.data;
+        } else if (Array.isArray(res.data?.events)) {
+          data = res.data.events;
+        } else if (res.data?.success === false) {
+          // Handle API error response
+          throw new Error(res.data.message || "Failed to fetch events");
+        }
+
+        // Validate data is an array before setting
+        if (!Array.isArray(data)) {
+          console.warn("Events data is not an array:", data);
+          data = [];
+        }
+
+        setEvents(data);
+        eventsCacheStore.set(data);
+      } catch (err) {
+        logError("Events Fetch", err);
+        const errorMessage = getErrorMessage(
+          err,
+          "Unable to load events right now.",
+        );
+        setError(errorMessage);
+
+        // Don't clear cache on error - keep showing last successful data if available
+        // Only clear cache if this was a retry and we want fresh data
+        if (isRetry && events.length === 0) {
+          eventsCacheStore.set(null);
+        }
+      } finally {
+        setLoading(false);
+        setRetrying(false);
       }
-    } finally {
-      setLoading(false);
-      setRetrying(false);
-    }
-  }, [events.length]);
+    },
+    [events.length],
+  );
 
   useEffect(() => {
     if (eventsCacheStore.get() !== null) return;
@@ -134,8 +141,51 @@ const Events = () => {
   }, [fetchEvents]);
 
   const now = new Date();
-  const upcomingEvents = events.filter((e) => new Date(e.date) >= now);
-  const pastEvents = events.filter((e) => new Date(e.date) < now);
+
+  // Categorize events with time consideration
+  const categorizeEvents = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const todayOngoing = [];
+    const todayPast = [];
+    const upcoming = [];
+    const past = [];
+
+    events.forEach((event) => {
+      const eventDate = new Date(event.date);
+      const eventDateOnly = new Date(eventDate);
+      eventDateOnly.setHours(0, 0, 0, 0);
+
+      // Check if event is today
+      const isToday = eventDateOnly.getTime() === today.getTime();
+
+      if (isToday) {
+        // Today's events - check if time has passed
+        if (eventDate > now) {
+          todayOngoing.push(event);
+        } else {
+          todayPast.push(event);
+        }
+      } else if (eventDate > now) {
+        // Future events
+        upcoming.push(event);
+      } else {
+        // Past events
+        past.push(event);
+      }
+    });
+
+    return { todayOngoing, todayPast, upcoming, past };
+  };
+
+  const { todayOngoing, todayPast, upcoming, past } = categorizeEvents();
+
+  // Combine today ongoing + upcoming for "Upcoming Events" section
+  const upcomingEvents = [...todayOngoing, ...upcoming];
+
+  // Combine today past + past for "Past Events" section
+  const pastEvents = [...todayPast, ...past];
 
   const container = {
     hidden: { opacity: 0 },
@@ -201,12 +251,15 @@ const Events = () => {
                     key={event._id}
                     variants={item}
                     whileHover={{ scale: 1.02 }}
-                    onClick={() => setSelectedEvent(event)}
+                    onClick={() => {
+                      setSelectedEvent(event);
+                      setSelectedEventIsPast(false);
+                    }}
                     className="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden cursor-pointer transition"
                   >
-                    {event.images?.length > 0 ? (
+                    {event.coverImage?.url ? (
                       <img
-                        src={event.images[0].url}
+                        src={event.coverImage.url}
                         alt={event.title}
                         className="h-48 w-full object-cover"
                       />
@@ -221,7 +274,18 @@ const Events = () => {
                         {event.title}
                       </h3>
                       <p className="text-sm text-gray-500">
-                        {new Date(event.date).toDateString()}
+                        {new Date(event.date).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {new Date(event.date).toLocaleTimeString("en-US", {
+                          hour: "numeric",
+                          minute: "2-digit",
+                          hour12: true,
+                        })}
                       </p>
                     </div>
                   </motion.div>
@@ -251,7 +315,10 @@ const Events = () => {
                     key={event._id}
                     variants={item}
                     whileHover={{ scale: 1.02 }}
-                    onClick={() => setSelectedEvent(event)}
+                    onClick={() => {
+                      setSelectedEvent(event);
+                      setSelectedEventIsPast(true);
+                    }}
                     className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 space-y-4 cursor-pointer hover:shadow-lg transition"
                   >
                     <div>
@@ -259,13 +326,24 @@ const Events = () => {
                         {event.title}
                       </h3>
                       <p className="text-sm text-gray-500">
-                        {new Date(event.date).toDateString()}
+                        {new Date(event.date).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {new Date(event.date).toLocaleTimeString("en-US", {
+                          hour: "numeric",
+                          minute: "2-digit",
+                          hour12: true,
+                        })}
                       </p>
                     </div>
 
-                    {event.images?.length > 0 ? (
+                    {event.coverImage?.url ? (
                       <img
-                        src={event.images[0].url}
+                        src={event.coverImage.url}
                         alt={event.title}
                         className="h-48 w-full object-cover"
                       />
@@ -281,6 +359,7 @@ const Events = () => {
             {selectedEvent && (
               <EventDetailModal
                 event={selectedEvent}
+                isPast={selectedEventIsPast}
                 onClose={() => setSelectedEvent(null)}
               />
             )}
