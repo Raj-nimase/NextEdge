@@ -1,9 +1,10 @@
-import axios from "axios";
+import { Link } from "react-router-dom";
+import { api } from "../api/axios.js";
 
 const AdminEventTable = ({ events, onEdit, onDelete }) => {
   const deleteEvent = async (id) => {
     if (!confirm("Delete this event?")) return;
-    await axios.delete(`http://localhost:3000/api/events/${id}`);
+    await api.delete(`/events/${id}`);
     onDelete();
   };
 
@@ -22,13 +23,19 @@ const AdminEventTable = ({ events, onEdit, onDelete }) => {
           {events.map(event => (
             <tr key={event._id} className="border-t">
               <td className="p-4 font-medium">{event.title}</td>
-              <td>{new Date(event.date).toDateString()}</td>
+              <td>{new Date(event.date || event.eventStartDate).toDateString()}</td>
               <td>
-                {new Date(event.date) >= new Date()
+                {new Date(event.eventStartDate || event.date) >= new Date()
                   ? "Upcoming"
                   : "Past"}
               </td>
-              <td className="p-4 flex gap-2 justify-end">
+              <td className="p-4 flex flex-wrap gap-2 justify-end">
+                <Link
+                  to={`/admin/events/${event._id}/registrations`}
+                  className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded inline-block"
+                >
+                  Registrations
+                </Link>
                 <button
                   onClick={() => onEdit(event)}
                   className="px-3 py-1 bg-indigo-600 text-white rounded"

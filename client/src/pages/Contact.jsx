@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Mail, Phone, MapPin, Clock } from "lucide-react";
-import axios from "axios";
+import { api } from "../api/axios.js";
 import { motion, AnimatePresence } from "framer-motion";
 import Footer from "../components/Footer";
 
@@ -410,10 +410,10 @@ const Contact = () => {
     try {
       const endpoint =
         activeTab === "membership"
-          ? "http://localhost:3000/api/contacts/membership"
-          : "http://localhost:3000/api/contacts/volunteer";
+          ? "/contacts/membership"
+          : "/contacts/volunteer";
 
-      const response = await axios.post(endpoint, formData);
+      const response = await api.post(endpoint, formData);
 
       if (response.data.success) {
         setFormMessage("Request submitted successfully!");

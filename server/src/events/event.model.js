@@ -9,11 +9,21 @@ const eventSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
     description: { type: String },
-    date: { type: Date, required: true },
+    // Legacy: kept for backward compatibility; prefer eventStartDate
+    date: { type: Date },
+    eventStartDate: { type: Date },
+    registrationStartDate: { type: Date },
+    registrationEndDate: { type: Date },
+    accessType: {
+      type: String,
+      required: true,
+      enum: ["public", "members"],
+      default: "public",
+    },
     location: { type: String },
 
-    coverImage: mediaSchema, // Single cover image (set at creation)
-    images: [mediaSchema], // Gallery images (added after event passes)
+    coverImage: mediaSchema,
+    images: [mediaSchema],
     youtubeVideoUrl: { type: String },
 
     createdBy: {

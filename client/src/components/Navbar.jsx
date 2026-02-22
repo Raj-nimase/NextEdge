@@ -180,7 +180,7 @@ const Navbar = () => {
           ))}
           {isAuthenticated && (
             <Link
-              to="/admin/event-form"
+              to="/admin/events"
               className="
     ml-2 px-5 py-2 rounded-full
     bg-blue-600 text-white
@@ -309,7 +309,7 @@ const Navbar = () => {
             {isAuthenticated && (
               <>
                 <Link
-                  to="/admin/event-form"
+                  to="/admin/events"
                   onClick={() => setMenuOpen(false)}
                   className="
               mt-2 px-4 py-2

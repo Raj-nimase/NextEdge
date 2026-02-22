@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import { api } from "../api/axios.js";
 import { Trash2, Mail, Phone, Calendar, User, BookOpen, MessageSquare } from "lucide-react";
 
 const AdminContactPage = () => {
@@ -10,19 +10,21 @@ const AdminContactPage = () => {
 
   const fetchMemberships = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/contacts/membership");
+      const res = await api.get("/contacts/membership");
       setMemberships(res.data.memberships || []);
     } catch (error) {
       console.error("Error fetching memberships:", error);
+      setMemberships([]);
     }
   };
 
   const fetchVolunteers = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/contacts/volunteer");
+      const res = await api.get("/contacts/volunteer");
       setVolunteers(res.data.volunteers || []);
     } catch (error) {
       console.error("Error fetching volunteers:", error);
+      setVolunteers([]);
     }
   };
 
@@ -38,7 +40,7 @@ const AdminContactPage = () => {
   const deleteMembership = async (id) => {
     if (!confirm("Delete this membership application?")) return;
     try {
-      await axios.delete(`http://localhost:3000/api/contacts/membership/${id}`);
+      await api.delete(`/contacts/membership/${id}`);
       fetchMemberships();
     } catch (error) {
       console.error("Error deleting membership:", error);
@@ -49,7 +51,7 @@ const AdminContactPage = () => {
   const deleteVolunteer = async (id) => {
     if (!confirm("Delete this volunteer application?")) return;
     try {
-      await axios.delete(`http://localhost:3000/api/contacts/volunteer/${id}`);
+      await api.delete(`/contacts/volunteer/${id}`);
       fetchVolunteers();
     } catch (error) {
       console.error("Error deleting volunteer:", error);

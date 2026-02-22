@@ -26,7 +26,7 @@ const AdminLogin = () => {
       const result = await login(username, password);
 
       if (result.success) {
-        navigate("/admin/event-form");
+        navigate("/admin/events");
       } else {
         setError(result.message || "Login failed");
       }

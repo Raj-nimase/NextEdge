@@ -3,6 +3,21 @@ import { uploadBuffer } from "./uploadToImageKit.js";
 import imagekit from "../config/imagekit.js";
 import { isValidYoutubeUrl } from "../utils/youtube.js";
 
+/** Normalize event for API: ensure eventStartDate and date; use UTC. */
+function normalizeEvent(event) {
+  if (!event) return null;
+  const doc = event.toObject ? event.toObject() : { ...event };
+  const start = doc.eventStartDate || doc.date;
+  if (start) {
+    doc.eventStartDate = new Date(start);
+    doc.date = doc.date || doc.eventStartDate;
+  }
+  if (doc.registrationStartDate) doc.registrationStartDate = new Date(doc.registrationStartDate);
+  if (doc.registrationEndDate) doc.registrationEndDate = new Date(doc.registrationEndDate);
+  doc.accessType = doc.accessType || "public";
+  return doc;
+}
+
 // CREATE EVENT
 export const createEvent = async (req, res) => {
   try {
@@ -33,24 +48,35 @@ export const createEvent = async (req, res) => {
         .json({ success: false, message: "Invalid YouTube URL" });
     }
 
-    // Build event data explicitly (avoid spreading req.body which may contain extra fields)
+    const eventStartDate = req.body.eventStartDate || req.body.date;
+    const registrationStartDate = req.body.registrationStartDate || eventStartDate;
+    const registrationEndDate = req.body.registrationEndDate || eventStartDate;
+    const accessType = req.body.accessType === "members" ? "members" : "public";
+
+    if (!eventStartDate) {
+      return res.status(400).json({
+        success: false,
+        message: "Event start date (eventStartDate or date) is required",
+      });
+    }
+
     const eventData = {
       title: req.body.title,
       description: req.body.description,
-      date: req.body.date,
+      date: eventStartDate,
+      eventStartDate,
+      registrationStartDate,
+      registrationEndDate,
+      accessType,
       location: req.body.location,
       youtubeVideoUrl: req.body.youtubeVideoUrl || undefined,
       images: [],
     };
 
-    // Only attach coverImage if one was uploaded
-    if (coverImage) {
-      eventData.coverImage = coverImage;
-    }
+    if (coverImage) eventData.coverImage = coverImage;
 
     const event = await Event.create(eventData);
-
-    res.status(201).json({ success: true, event });
+    res.status(201).json({ success: true, event: normalizeEvent(event) });
   } catch (error) {
     console.error("CREATE EVENT ERROR:", error);
     res.status(500).json({ success: false, message: error.message });
@@ -59,34 +85,35 @@ export const createEvent = async (req, res) => {
 
 // GET ALL EVENTS
 export const getAllEvents = async (req, res) => {
-  const events = await Event.find().sort({ date: 1 });
-  res.json({ success: true, events });
+  const events = await Event.find().sort({ date: 1, eventStartDate: 1, createdAt: 1 });
+  res.json({ success: true, events: events.map(normalizeEvent) });
 };
 
 // GET UPCOMING EVENTS
 export const getUpcomingEvents = async (req, res) => {
+  const now = new Date();
   const events = await Event.find({
-    date: { $gte: new Date() },
-  }).sort({ date: 1 });
+    $or: [{ date: { $gte: now } }, { eventStartDate: { $gte: now } }],
+  }).sort({ date: 1, eventStartDate: 1 });
 
-  res.json({ success: true, events });
+  res.json({ success: true, events: events.map(normalizeEvent) });
 };
 
 // GET PAST EVENTS
 export const getPastEvents = async (req, res) => {
+  const now = new Date();
   const events = await Event.find({
-    date: { $lt: new Date() },
-  }).sort({ date: -1 });
+    $or: [{ date: { $lt: now } }, { eventStartDate: { $lt: now } }],
+  }).sort({ date: -1, eventStartDate: -1 });
 
-  res.json({ success: true, events });
+  res.json({ success: true, events: events.map(normalizeEvent) });
 };
 
 // GET SINGLE EVENT
 export const getEventById = async (req, res) => {
   const event = await Event.findById(req.params.id);
   if (!event) return res.status(404).json({ message: "Event not found" });
-
-  res.json({ success: true, event });
+  res.json({ success: true, event: normalizeEvent(event) });
 };
 
 // DELETE EVENT
@@ -131,23 +158,30 @@ export const updateEvent = async (req, res) => {
         .json({ success: false, message: "Invalid YouTube URL" });
     }
 
-    const event = await Event.findByIdAndUpdate(
-      req.params.id,
-      {
-        title: req.body.title,
-        description: req.body.description,
-        date: req.body.date,
-        location: req.body.location,
-        youtubeVideoUrl: youtubeVideoUrl,
-      },
-      { new: true },
-    );
+    const update = {
+      title: req.body.title,
+      description: req.body.description,
+      location: req.body.location,
+      youtubeVideoUrl: youtubeVideoUrl,
+    };
+    if (req.body.eventStartDate != null) {
+      update.eventStartDate = req.body.eventStartDate;
+      update.date = req.body.eventStartDate;
+    } else if (req.body.date != null) {
+      update.date = req.body.date;
+      update.eventStartDate = req.body.date;
+    }
+    if (req.body.registrationStartDate != null) update.registrationStartDate = req.body.registrationStartDate;
+    if (req.body.registrationEndDate != null) update.registrationEndDate = req.body.registrationEndDate;
+    if (req.body.accessType != null) update.accessType = req.body.accessType === "members" ? "members" : "public";
+
+    const event = await Event.findByIdAndUpdate(req.params.id, update, { new: true });
 
     if (!event) {
       return res.status(404).json({ message: "Event not found" });
     }
 
-    res.json({ success: true, event });
+    res.json({ success: true, event: normalizeEvent(event) });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

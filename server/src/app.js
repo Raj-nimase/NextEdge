@@ -7,6 +7,7 @@ import rateLimit from "express-rate-limit";
 import eventRoutes from "./events/event.routes.js";
 import adminRoutes from "./Admin/admin.routes.js";
 import contactRoutes from "./contacts/contact.routes.js";
+import memberRoutes from "./members/member.routes.js";
 
 const app = express();
 
@@ -41,6 +42,7 @@ const loginLimiter = rateLimit({
 
 app.use("/api", apiLimiter);
 app.use("/api/admin/login", loginLimiter);
+app.use("/api/members/login", loginLimiter);
 
 app.use(express.json());
 
@@ -48,6 +50,7 @@ app.use(express.json());
 app.use("/api/admin", adminRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/contacts", contactRoutes);
+app.use("/api/members", memberRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");

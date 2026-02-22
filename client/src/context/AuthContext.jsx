@@ -14,43 +14,30 @@ const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [admin, setAdmin] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [accessToken, setAccessToken] = useState(null);
+  const [member, setMember] = useState(null);
+  const [memberAccessToken, setMemberAccessToken] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Keep axios auth header in sync with token
+  // Use member token for API when member is logged in, else admin token
   useEffect(() => {
-    setAuthToken(accessToken);
-  }, [accessToken]);
+    setAuthToken(memberAccessToken || accessToken);
+  }, [accessToken, memberAccessToken]);
 
-  // Initialize auth state on mount using refresh token (HTTP-only cookie)
-  useEffect(() => {
-    const initAuth = async () => {
-      try {
-        await refreshToken();
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initAuth();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Login function
   const login = async (username, password) => {
     try {
       const response = await api.post("/admin/login", {
         username,
         password,
       });
-
       if (response.data.success) {
         const { accessToken: newToken, admin: adminData } = response.data;
         setAccessToken(newToken);
         setAdmin(adminData);
+        setMember(null);
+        setMemberAccessToken(null);
         return { success: true };
       }
-
       return { success: false, message: response.data.message };
     } catch (error) {
       console.error("Login error:", error);
@@ -61,7 +48,30 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout function
+  const memberLogin = async (email, password) => {
+    try {
+      const response = await api.post("/members/login", {
+        email,
+        password,
+      });
+      if (response.data.success) {
+        const { accessToken: newToken, member: memberData } = response.data;
+        setMemberAccessToken(newToken);
+        setMember(memberData);
+        setAccessToken(null);
+        setAdmin(null);
+        return { success: true };
+      }
+      return { success: false, message: response.data.message };
+    } catch (error) {
+      console.error("Member login error:", error);
+      return {
+        success: false,
+        message: error.response?.data?.message || "Login failed",
+      };
+    }
+  };
+
   const logout = async () => {
     try {
       await api.post("/admin/logout");
@@ -73,36 +83,71 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Refresh token function
-  const refreshToken = async () => {
+  const memberLogout = async () => {
     try {
-      const response = await api.post("/admin/refresh");
-
-      if (response.data.success) {
-        const { accessToken: newToken, admin: adminData } = response.data;
-        setAccessToken(newToken);
-        setAdmin(adminData);
-        return true;
-      }
-
-      // Refresh failed, logout
-      logout();
-      return false;
+      await api.post("/members/logout");
     } catch (error) {
-      console.error("Token refresh failed:", error);
-      logout();
-      return false;
+      console.error("Member logout error:", error);
+    } finally {
+      setMemberAccessToken(null);
+      setMember(null);
     }
   };
 
+  const refreshToken = async () => {
+    try {
+      const adminRes = await api.post("/admin/refresh");
+      if (adminRes.data.success) {
+        const { accessToken: newToken, admin: adminData } = adminRes.data;
+        setAccessToken(newToken);
+        setAdmin(adminData);
+        setMember(null);
+        setMemberAccessToken(null);
+        return true;
+      }
+    } catch (e) {
+      setAccessToken(null);
+      setAdmin(null);
+    }
+    try {
+      const memberRes = await api.post("/members/refresh");
+      if (memberRes.data.success) {
+        const { accessToken: newToken, member: memberData } = memberRes.data;
+        setMemberAccessToken(newToken);
+        setMember(memberData);
+        return true;
+      }
+    } catch (e) {
+      setMemberAccessToken(null);
+      setMember(null);
+    }
+    return false;
+  };
+
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        await refreshToken();
+      } finally {
+        setLoading(false);
+      }
+    };
+    initAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const value = {
     admin,
+    member,
     loading,
     accessToken,
     login,
     logout,
+    memberLogin,
+    memberLogout,
     refreshToken,
     isAuthenticated: !!admin,
+    isMember: !!member,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

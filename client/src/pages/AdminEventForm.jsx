@@ -21,6 +21,13 @@ const AdminEventForm = ({ onSuccess }) => {
   const [amPm, setAmPm] = useState("PM");
   const [location, setLocation] = useState("");
   const [youtubeVideoUrl, setYoutubeVideoUrl] = useState("");
+  const [registrationStartDate, setRegistrationStartDate] = useState("");
+  const [registrationStartTime, setRegistrationStartTime] = useState("00:00");
+  const [registrationStartAmPm, setRegistrationStartAmPm] = useState("AM");
+  const [registrationEndDate, setRegistrationEndDate] = useState("");
+  const [registrationEndTime, setRegistrationEndTime] = useState("23:59");
+  const [registrationEndAmPm, setRegistrationEndAmPm] = useState("PM");
+  const [accessType, setAccessType] = useState("public");
 
   const [coverImage, setCoverImage] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -64,10 +71,30 @@ const AdminEventForm = ({ onSuccess }) => {
       return;
     }
 
+    const regStartDateTime = combineDateTime(
+      registrationStartDate,
+      registrationStartTime,
+      registrationStartAmPm
+    );
+    const regEndDateTime = combineDateTime(
+      registrationEndDate,
+      registrationEndTime,
+      registrationEndAmPm
+    );
+    if (!regStartDateTime || !regEndDateTime) {
+      setError("Please set registration start and end date/time.");
+      setLoading(false);
+      return;
+    }
+
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
     formData.append("date", dateTime);
+    formData.append("eventStartDate", dateTime);
+    formData.append("registrationStartDate", regStartDateTime);
+    formData.append("registrationEndDate", regEndDateTime);
+    formData.append("accessType", accessType);
     formData.append("location", location);
     formData.append("youtubeVideoUrl", youtubeVideoUrl);
 
@@ -86,6 +113,9 @@ const AdminEventForm = ({ onSuccess }) => {
       setLocation("");
       setYoutubeVideoUrl("");
       setCoverImage(null);
+      setRegistrationStartDate("");
+      setRegistrationEndDate("");
+      setAccessType("public");
 
       setTimeout(() => {
         setSuccess(false);
@@ -210,6 +240,78 @@ const AdminEventForm = ({ onSuccess }) => {
               Selected: {date && time && `${date} ${time} ${amPm}`}
             </p>
           </div>
+        </div>
+
+        {/* Registration window */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Registration opens
+            </label>
+            <div className="flex gap-2 flex-wrap">
+              <input
+                type="date"
+                value={registrationStartDate}
+                onChange={(e) => setRegistrationStartDate(e.target.value)}
+                className="flex-1 min-w-[140px] px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+              />
+              <input
+                type="time"
+                value={registrationStartTime}
+                onChange={(e) => setRegistrationStartTime(e.target.value)}
+                className="px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+              />
+              <select
+                value={registrationStartAmPm}
+                onChange={(e) => setRegistrationStartAmPm(e.target.value)}
+                className="px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+              >
+                <option value="AM">AM</option>
+                <option value="PM">PM</option>
+              </select>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Registration closes
+            </label>
+            <div className="flex gap-2 flex-wrap">
+              <input
+                type="date"
+                value={registrationEndDate}
+                onChange={(e) => setRegistrationEndDate(e.target.value)}
+                className="flex-1 min-w-[140px] px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+              />
+              <input
+                type="time"
+                value={registrationEndTime}
+                onChange={(e) => setRegistrationEndTime(e.target.value)}
+                className="px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+              />
+              <select
+                value={registrationEndAmPm}
+                onChange={(e) => setRegistrationEndAmPm(e.target.value)}
+                className="px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+              >
+                <option value="AM">AM</option>
+                <option value="PM">PM</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+            Who can register
+          </label>
+          <select
+            value={accessType}
+            onChange={(e) => setAccessType(e.target.value)}
+            className="w-full max-w-xs px-4 py-3 border-2 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+          >
+            <option value="public">Public (anyone)</option>
+            <option value="members">Members only</option>
+          </select>
         </div>
 
         {/* Location */}

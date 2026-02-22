@@ -3,6 +3,16 @@ import { api } from "../api/axios.js";
 import { isValidYoutubeUrl } from "../utils/youtube.js";
 import { Clock } from "lucide-react";
 
+const toTimeInput = (dateObj) => {
+  if (!dateObj) return "00:00";
+  const d = new Date(dateObj);
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+};
+const toDateInput = (dateObj) => {
+  if (!dateObj) return "";
+  return new Date(dateObj).toISOString().slice(0, 10);
+};
+
 const AdminEventEditModal = ({ event, onClose, onUpdated }) => {
   const [title, setTitle] = useState(event.title);
   const [description, setDescription] = useState(event.description);
@@ -12,35 +22,36 @@ const AdminEventEditModal = ({ event, onClose, onUpdated }) => {
   const [youtubeVideoUrl, setYoutubeVideoUrl] = useState(
     event.youtubeVideoUrl || "",
   );
+  const [registrationStartDate, setRegistrationStartDate] = useState("");
+  const [registrationStartTime, setRegistrationStartTime] = useState("00:00");
+  const [registrationEndDate, setRegistrationEndDate] = useState("");
+  const [registrationEndTime, setRegistrationEndTime] = useState("23:59");
   const [newImages, setNewImages] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Determine if the event is in the past
-  const isPast = new Date(event.date) < new Date();
+  const eventStart = event.eventStartDate || event.date;
+  const isPast = new Date(eventStart) < new Date();
 
-  // Extract date and time from event.date
+  // Extract date/time from event
   useEffect(() => {
-    if (event.date) {
-      const eventDate = new Date(event.date);
-      setDate(eventDate.toISOString().slice(0, 10));
-
-      const hours = eventDate.getHours();
-      const minutes = eventDate.getMinutes();
-
-      // Store time in 24-hour format (which is what <input type="time"> uses)
-      setTime(
-        `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`,
-      );
+    if (event.date || event.eventStartDate) {
+      const eventDate = new Date(eventStart);
+      setDate(toDateInput(eventDate));
+      setTime(toTimeInput(eventDate));
     }
-  }, [event.date]);
+    if (event.registrationStartDate) {
+      setRegistrationStartDate(toDateInput(event.registrationStartDate));
+      setRegistrationStartTime(toTimeInput(event.registrationStartDate));
+    }
+    if (event.registrationEndDate) {
+      setRegistrationEndDate(toDateInput(event.registrationEndDate));
+      setRegistrationEndTime(toTimeInput(event.registrationEndDate));
+    }
+  }, [event.date, event.eventStartDate, event.registrationStartDate, event.registrationEndDate, eventStart]);
 
-  // Convert time inputs to ISO datetime string
   const combineDateTime = (dateStr, timeStr) => {
-    if (!dateStr) return event.date; // fallback to original
-
-    // timeStr is already in 24-hour format from <input type="time"> (e.g. "14:30")
-    const dateTimeStr = `${dateStr}T${timeStr}:00`;
-    return dateTimeStr;
+    if (!dateStr) return null;
+    return `${dateStr}T${timeStr}:00`;
   };
 
   const updateEvent = async () => {
@@ -56,14 +67,21 @@ const AdminEventEditModal = ({ event, onClose, onUpdated }) => {
 
       // Combine date and time into ISO datetime string
       const dateTime = combineDateTime(date, time);
+      const regStart = combineDateTime(registrationStartDate, registrationStartTime);
+      const regEnd = combineDateTime(registrationEndDate, registrationEndTime);
 
-      await api.put(`/events/${event._id}`, {
+      const payload = {
         title,
         description,
         date: dateTime,
+        eventStartDate: dateTime,
         location,
         youtubeVideoUrl,
-      });
+      };
+      if (regStart) payload.registrationStartDate = regStart;
+      if (regEnd) payload.registrationEndDate = regEnd;
+
+      await api.put(`/events/${event._id}`, payload);
 
       // Only allow adding gallery images if event is past
       if (isPast && newImages.length) {
@@ -172,6 +190,58 @@ const AdminEventEditModal = ({ event, onClose, onUpdated }) => {
                 border-gray-300 dark:border-gray-600
                 focus:ring-2 focus:ring-indigo-500 outline-none"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Registration opens
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="date"
+                  value={registrationStartDate}
+                  onChange={(e) => setRegistrationStartDate(e.target.value)}
+                  className="flex-1 min-w-0 px-3 py-2 border rounded-lg bg-transparent
+                  text-gray-800 dark:text-gray-100
+                  border-gray-300 dark:border-gray-600
+                  focus:ring-2 focus:ring-indigo-500 outline-none"
+                />
+                <input
+                  type="time"
+                  value={registrationStartTime}
+                  onChange={(e) => setRegistrationStartTime(e.target.value)}
+                  className="w-28 px-3 py-2 border rounded-lg bg-transparent
+                  text-gray-800 dark:text-gray-100
+                  border-gray-300 dark:border-gray-600
+                  focus:ring-2 focus:ring-indigo-500 outline-none"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Registration closes
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="date"
+                  value={registrationEndDate}
+                  onChange={(e) => setRegistrationEndDate(e.target.value)}
+                  className="flex-1 min-w-0 px-3 py-2 border rounded-lg bg-transparent
+                  text-gray-800 dark:text-gray-100
+                  border-gray-300 dark:border-gray-600
+                  focus:ring-2 focus:ring-indigo-500 outline-none"
+                />
+                <input
+                  type="time"
+                  value={registrationEndTime}
+                  onChange={(e) => setRegistrationEndTime(e.target.value)}
+                  className="w-28 px-3 py-2 border rounded-lg bg-transparent
+                  text-gray-800 dark:text-gray-100
+                  border-gray-300 dark:border-gray-600
+                  focus:ring-2 focus:ring-indigo-500 outline-none"
+                />
+              </div>
             </div>
           </div>
 

@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import EventDetailModal from "../components/EventDetailModal";
 import Footer from "../components/Footer";
+import CountdownTimer from "../components/CountdownTimer";
+import RegistrationWindow from "../components/RegistrationWindow";
 import { api } from "../api/axios.js";
 import { eventsCacheStore } from "../cache/eventsGalleryCache";
 import { getErrorMessage, logError } from "../utils/errorHandler";
@@ -78,8 +80,6 @@ const Events = () => {
   const [loading, setLoading] = useState(() => eventsCacheStore.get() === null);
   const [error, setError] = useState(null);
   const [retrying, setRetrying] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState(null);
-  const [selectedEventIsPast, setSelectedEventIsPast] = useState(false);
 
   const fetchEvents = useCallback(
     async (isRetry = false) => {
@@ -141,37 +141,29 @@ const Events = () => {
   }, [fetchEvents]);
 
   const now = new Date();
+  const getEventStart = (event) =>
+    event.eventStartDate ? new Date(event.eventStartDate) : new Date(event.date);
 
-  // Categorize events with time consideration
   const categorizeEvents = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
     const todayOngoing = [];
     const todayPast = [];
     const upcoming = [];
     const past = [];
 
     events.forEach((event) => {
-      const eventDate = new Date(event.date);
+      const eventDate = getEventStart(event);
       const eventDateOnly = new Date(eventDate);
       eventDateOnly.setHours(0, 0, 0, 0);
-
-      // Check if event is today
       const isToday = eventDateOnly.getTime() === today.getTime();
 
       if (isToday) {
-        // Today's events - check if time has passed
-        if (eventDate > now) {
-          todayOngoing.push(event);
-        } else {
-          todayPast.push(event);
-        }
+        if (eventDate > now) todayOngoing.push(event);
+        else todayPast.push(event);
       } else if (eventDate > now) {
-        // Future events
         upcoming.push(event);
       } else {
-        // Past events
         past.push(event);
       }
     });
@@ -246,50 +238,80 @@ const Events = () => {
                 animate="show"
                 className="grid grid-cols-1 md:grid-cols-3 gap-6"
               >
-                {upcomingEvents.map((event) => (
-                  <motion.div
-                    key={event._id}
-                    variants={item}
-                    whileHover={{ scale: 1.02 }}
-                    onClick={() => {
-                      setSelectedEvent(event);
-                      setSelectedEventIsPast(false);
-                    }}
-                    className="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden cursor-pointer transition"
-                  >
-                    {event.coverImage?.url ? (
-                      <img
-                        src={event.coverImage.url}
-                        alt={event.title}
-                        className="h-48 w-full object-cover"
-                      />
-                    ) : (
-                      <div className="h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-500">
-                        No Image
-                      </div>
-                    )}
+                {upcomingEvents.map((event) => {
+                  const start = getEventStart(event);
+                  return (
+                    <motion.div
+                      key={event._id}
+                      variants={item}
+                      whileHover={{ scale: 1.02 }}
+                      className="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden transition"
+                    >
+                      <Link to={`/events/${event._id}`} className="block">
+                        {event.coverImage?.url ? (
+                          <img
+                            src={event.coverImage.url}
+                            alt={event.title}
+                            className="h-48 w-full object-cover"
+                          />
+                        ) : (
+                          <div className="h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-500">
+                            No Image
+                          </div>
+                        )}
 
-                    <div className="p-5">
-                      <h3 className="font-semibold text-lg text-gray-800 dark:text-gray-100">
-                        {event.title}
-                      </h3>
-                      <p className="text-sm text-gray-500">
-                        {new Date(event.date).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        {new Date(event.date).toLocaleTimeString("en-US", {
-                          hour: "numeric",
-                          minute: "2-digit",
-                          hour12: true,
-                        })}
-                      </p>
-                    </div>
-                  </motion.div>
-                ))}
+                        <div className="p-5">
+                          <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <span
+                              className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
+                                (event.accessType || "public") === "members"
+                                  ? "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300"
+                                  : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                              }`}
+                            >
+                              {(event.accessType || "public") === "members" ? "Members only" : "Public"}
+                            </span>
+                          </div>
+                          <h3 className="font-semibold text-lg text-gray-800 dark:text-gray-100">
+                            {event.title}
+                          </h3>
+                          <p className="text-sm text-gray-500">
+                            {start.toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </p>
+                          <p className="text-xs text-gray-400 mt-1">
+                            {start.toLocaleTimeString("en-US", {
+                              hour: "numeric",
+                              minute: "2-digit",
+                              hour12: true,
+                            })}
+                          </p>
+                          <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Starts in</p>
+                            <CountdownTimer
+                              targetDate={event.eventStartDate || event.date}
+                              endedLabel="Started"
+                              compact
+                            />
+                          </div>
+                          {(event.registrationStartDate || event.registrationEndDate) && (
+                            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Registration</p>
+                              <RegistrationWindow
+                                registrationStartDate={event.registrationStartDate}
+                                registrationEndDate={event.registrationEndDate}
+                                compact
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </Link>
+                    </motion.div>
+                  );
+                })}
               </motion.div>
             )}
           </section>
@@ -310,58 +332,52 @@ const Events = () => {
                 animate="show"
                 className="grid grid-cols-1 md:grid-cols-3 gap-6"
               >
-                {pastEvents.map((event) => (
-                  <motion.div
-                    key={event._id}
-                    variants={item}
-                    whileHover={{ scale: 1.02 }}
-                    onClick={() => {
-                      setSelectedEvent(event);
-                      setSelectedEventIsPast(true);
-                    }}
-                    className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 space-y-4 cursor-pointer hover:shadow-lg transition"
-                  >
-                    <div>
-                      <h3 className="font-semibold text-xl text-gray-800 dark:text-gray-100">
-                        {event.title}
-                      </h3>
-                      <p className="text-sm text-gray-500">
-                        {new Date(event.date).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        {new Date(event.date).toLocaleTimeString("en-US", {
-                          hour: "numeric",
-                          minute: "2-digit",
-                          hour12: true,
-                        })}
-                      </p>
-                    </div>
+                {pastEvents.map((event) => {
+                  const start = getEventStart(event);
+                  return (
+                    <motion.div
+                      key={event._id}
+                      variants={item}
+                      whileHover={{ scale: 1.02 }}
+                      className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 space-y-4 hover:shadow-lg transition"
+                    >
+                      <Link to={`/events/${event._id}`} className="block">
+                        <div>
+                          <h3 className="font-semibold text-xl text-gray-800 dark:text-gray-100">
+                            {event.title}
+                          </h3>
+                          <p className="text-sm text-gray-500">
+                            {start.toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </p>
+                          <p className="text-xs text-gray-400 mt-1">
+                            {start.toLocaleTimeString("en-US", {
+                              hour: "numeric",
+                              minute: "2-digit",
+                              hour12: true,
+                            })}
+                          </p>
+                        </div>
 
-                    {event.coverImage?.url ? (
-                      <img
-                        src={event.coverImage.url}
-                        alt={event.title}
-                        className="h-48 w-full object-cover"
-                      />
-                    ) : (
-                      <div className="h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-500">
-                        No Image
-                      </div>
-                    )}
-                  </motion.div>
-                ))}
+                        {event.coverImage?.url ? (
+                          <img
+                            src={event.coverImage.url}
+                            alt={event.title}
+                            className="h-48 w-full object-cover"
+                          />
+                        ) : (
+                          <div className="h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-500">
+                            No Image
+                          </div>
+                        )}
+                      </Link>
+                    </motion.div>
+                  );
+                })}
               </motion.div>
-            )}
-            {selectedEvent && (
-              <EventDetailModal
-                event={selectedEvent}
-                isPast={selectedEventIsPast}
-                onClose={() => setSelectedEvent(null)}
-              />
             )}
           </section>
         </div>

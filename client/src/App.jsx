@@ -12,10 +12,15 @@ import About from "./pages/About";
 import Gallery from "./pages/Gallery";
 import Contact from "./pages/Contact";
 import Events from "./pages/Events";
+import EventDetail from "./pages/EventDetail";
 import NotFound from "./pages/NotFound";
 import AdminEventsPage from "./pages/AdminEventsPage";
+import AdminEventListPage from "./pages/AdminEventListPage";
+import AdminEventRegistrationsPage from "./pages/AdminEventRegistrationsPage";
 import AdminContactPage from "./pages/AdminContactPage";
+import AdminMembersPage from "./pages/AdminMembersPage";
 import AdminLogin from "./pages/AdminLogin";
+import MemberLogin from "./pages/MemberLogin";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 
@@ -37,9 +42,19 @@ const router = createBrowserRouter(
       <Route path="/gallery" element={<Gallery />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/events" element={<Events />} />
+      <Route path="/events/:eventId" element={<EventDetail />} />
 
       {/* Admin Routes */}
       <Route path="/admin/login" element={<AdminLogin />} />
+      <Route path="/member-login" element={<MemberLogin />} />
+      <Route
+        path="/admin/events"
+        element={
+          <ProtectedRoute>
+            <AdminEventListPage />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/admin/event-form"
         element={
@@ -49,10 +64,26 @@ const router = createBrowserRouter(
         }
       />
       <Route
+        path="/admin/events/:eventId/registrations"
+        element={
+          <ProtectedRoute>
+            <AdminEventRegistrationsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/admin/contacts"
         element={
           <ProtectedRoute>
             <AdminContactPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/members"
+        element={
+          <ProtectedRoute>
+            <AdminMembersPage />
           </ProtectedRoute>
         }
       />

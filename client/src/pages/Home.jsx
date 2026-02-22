@@ -187,7 +187,7 @@ const Home = () => {
             className="mt-10 md:mt-8 md:w-3xl flex flex-col sm:flex-row gap-4"
             ref={ctaRef}
           >
-            <button className="px-8 py-4 bg-black text-white rounded-full font-bold hover:scale-[1.03] transition">
+            <button className="px-8 py-4 bg-black text-white rounded-full font-bold hover:scale-[1.03] transition" onClick={() => navigate("/contact")}>
               Join Us
             </button>
 
